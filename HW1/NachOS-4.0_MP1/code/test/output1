@@ -1,0 +1,110 @@
+consoleIO_test3
+In Semaphore::P(), 30
+In Machine::Run(), into OneInstruction == Tick 40 ==
+In Machine::Run(), return from OneInstruction  == Tick 40 ==
+In Machine::Run(), into OneTick == Tick 40 ==
+In Machine::Run(), return from OneTick == Tick 41 ==
+In Machine::Run(), into OneInstruction == Tick 41 ==
+In Machine::Run(), return from OneInstruction  == Tick 41 ==
+In Machine::Run(), into OneTick == Tick 41 ==
+In Machine::Run(), return from OneTick == Tick 42 ==
+In Machine::Run(), into OneInstruction == Tick 42 ==
+In Machine::Run(), return from OneInstruction  == Tick 42 ==
+In Machine::Run(), into OneTick == Tick 42 ==
+In Machine::Run(), return from OneTick == Tick 43 ==
+In Machine::Run(), into OneInstruction == Tick 43 ==
+In Machine::Run(), return from OneInstruction  == Tick 43 ==
+In Machine::Run(), into OneTick == Tick 43 ==
+In Machine::Run(), return from OneTick == Tick 44 ==
+In Machine::Run(), into OneInstruction == Tick 44 ==
+In Machine::Run(), return from OneInstruction  == Tick 44 ==
+In Machine::Run(), into OneTick == Tick 44 ==
+In Machine::Run(), return from OneTick == Tick 45 ==
+In Machine::Run(), into OneInstruction == Tick 45 ==
+In Machine::Run(), return from OneInstruction  == Tick 45 ==
+In Machine::Run(), into OneTick == Tick 45 ==
+In Machine::Run(), return from OneTick == Tick 46 ==
+In Machine::Run(), into OneInstruction == Tick 46 ==
+In Machine::Run(), return from OneInstruction  == Tick 46 ==
+In Machine::Run(), into OneTick == Tick 46 ==
+In Machine::Run(), return from OneTick == Tick 47 ==
+In Machine::Run(), into OneInstruction == Tick 47 ==
+In Machine::Run(), return from OneInstruction  == Tick 47 ==
+In Machine::Run(), into OneTick == Tick 47 ==
+In Machine::Run(), return from OneTick == Tick 48 ==
+In Machine::Run(), into OneInstruction == Tick 48 ==
+In Machine::Run(), return from OneInstruction  == Tick 48 ==
+In Machine::Run(), into OneTick == Tick 48 ==
+In Machine::Run(), return from OneTick == Tick 49 ==
+In Machine::Run(), into OneInstruction == Tick 49 ==
+In Machine::Run(), return from OneInstruction  == Tick 49 ==
+In Machine::Run(), into OneTick == Tick 49 ==
+In Machine::Run(), return from OneTick == Tick 50 ==
+In Machine::Run(), into OneInstruction == Tick 50 ==
+In Machine::Run(), return from OneInstruction  == Tick 50 ==
+In Machine::Run(), into OneTick == Tick 50 ==
+In Machine::Run(), return from OneTick == Tick 51 ==
+In Machine::Run(), into OneInstruction == Tick 51 ==
+In Machine::Run(), return from OneInstruction  == Tick 51 ==
+In Machine::Run(), into OneTick == Tick 51 ==
+In Machine::Run(), return from OneTick == Tick 52 ==
+In Machine::Run(), into OneInstruction == Tick 52 ==
+In Machine::OneInstruction, RaiseException(SyscallException, 0), 52
+In ExceptionHandler(), Received Exception 1 type: 16, 52
+In ExceptionHandler(), into SysPrintInt, 52
+In ksyscall.h:SysPrintInt , into synchConsoleOut->PutInt, 52
+In Semaphore::P(), 52
+In SynchConsoleOutput::PutChar, into consoleOutput->PutChar, 62
+3In SynchConsoleOutput::PutChar, return from consoleOutput->PutChar, 62
+In SynchConsoleOutput::PutChar, into waitFor->P(), 62
+In Semaphore::P(), 62
+In ConsoleOutput::CallBack(), 162
+In SynchConsoleOutput::CallBack(), 162
+In Semaphore::V(), 162
+In SynchConsoleOutput::PutChar, return form  waitFor->P(), 172
+In SynchConsoleOutput::PutChar, into consoleOutput->PutChar, 172
+
+In SynchConsoleOutput::PutChar, return from consoleOutput->PutChar, 172
+In SynchConsoleOutput::PutChar, into waitFor->P(), 172
+In Semaphore::P(), 172
+In ConsoleOutput::CallBack(), 272
+In SynchConsoleOutput::CallBack(), 272
+In Semaphore::V(), 272
+In SynchConsoleOutput::PutChar, return form  waitFor->P(), 282
+In Semaphore::V(), 282
+In ExceptionHandler(), return from synchConsoleOut->PutInt, 292
+In ExceptionHandler(), return from SysPrintInt, 292
+In Machine::Run(), return from OneInstruction  == Tick 292 ==
+In Machine::Run(), into OneTick == Tick 292 ==
+In Machine::Run(), return from OneTick == Tick 293 ==
+In Machine::Run(), into OneInstruction == Tick 293 ==
+In Machine::Run(), return from OneInstruction  == Tick 293 ==
+In Machine::Run(), into OneTick == Tick 293 ==
+In Machine::Run(), return from OneTick == Tick 294 ==
+In Machine::Run(), into OneInstruction == Tick 294 ==
+In Machine::Run(), return from OneInstruction  == Tick 294 ==
+In Machine::Run(), into OneTick == Tick 294 ==
+In Machine::Run(), return from OneTick == Tick 295 ==
+In Machine::Run(), into OneInstruction == Tick 295 ==
+In Machine::Run(), return from OneInstruction  == Tick 295 ==
+In Machine::Run(), into OneTick == Tick 295 ==
+In Machine::Run(), return from OneTick == Tick 296 ==
+In Machine::Run(), into OneInstruction == Tick 296 ==
+In Machine::Run(), return from OneInstruction  == Tick 296 ==
+In Machine::Run(), into OneTick == Tick 296 ==
+In Machine::Run(), return from OneTick == Tick 297 ==
+In Machine::Run(), into OneInstruction == Tick 297 ==
+In Machine::Run(), return from OneInstruction  == Tick 297 ==
+In Machine::Run(), into OneTick == Tick 297 ==
+In Machine::Run(), return from OneTick == Tick 298 ==
+In Machine::Run(), into OneInstruction == Tick 298 ==
+In Machine::OneInstruction, RaiseException(SyscallException, 0), 298
+In ExceptionHandler(), Received Exception 1 type: 0, 298
+Machine halting!
+
+This is halt
+Ticks: total 298, idle 200, system 80, user 18
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 2
+Paging: faults 0
+Network I/O: packets received 0, sent 0

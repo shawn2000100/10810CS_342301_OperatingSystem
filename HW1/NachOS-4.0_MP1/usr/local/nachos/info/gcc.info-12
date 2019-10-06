@@ -1,0 +1,965 @@
+This is Info file gcc.info, produced by Makeinfo version 1.68 from the
+input file ../../gcc-2.95.2/gcc/gcc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* gcc: (gcc).                  The GNU Compiler Collection.
+END-INFO-DIR-ENTRY
+   This file documents the use and the internals of the GNU compiler.
+
+   Published by the Free Software Foundation 59 Temple Place - Suite 330
+Boston, MA 02111-1307 USA
+
+   Copyright (C) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+1999 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the sections entitled "GNU General Public License" and "Funding
+for Free Software" are included exactly as in the original, and
+provided that the entire resulting derived work is distributed under
+the terms of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that the sections entitled "GNU General Public
+License" and "Funding for Free Software", and this permission notice,
+may be included in translations approved by the Free Software Foundation
+instead of in the original English.
+
+
+File: gcc.info,  Node: Naming Results,  Next: Min and Max,  Up: C++ Extensions
+
+Named Return Values in C++
+==========================
+
+   GNU C++ extends the function-definition syntax to allow you to
+specify a name for the result of a function outside the body of the
+definition, in C++ programs:
+
+     TYPE
+     FUNCTIONNAME (ARGS) return RESULTNAME;
+     {
+       ...
+       BODY
+       ...
+     }
+
+   You can use this feature to avoid an extra constructor call when a
+function result has a class type.  For example, consider a function
+`m', declared as `X v = m ();', whose result is of class `X':
+
+     X
+     m ()
+     {
+       X b;
+       b.a = 23;
+       return b;
+     }
+
+   Although `m' appears to have no arguments, in fact it has one
+implicit argument: the address of the return value.  At invocation, the
+address of enough space to hold `v' is sent in as the implicit argument.
+Then `b' is constructed and its `a' field is set to the value 23.
+Finally, a copy constructor (a constructor of the form `X(X&)') is
+applied to `b', with the (implicit) return value location as the
+target, so that `v' is now bound to the return value.
+
+   But this is wasteful.  The local `b' is declared just to hold
+something that will be copied right out.  While a compiler that
+combined an "elision" algorithm with interprocedural data flow analysis
+could conceivably eliminate all of this, it is much more practical to
+allow you to assist the compiler in generating efficient code by
+manipulating the return value explicitly, thus avoiding the local
+variable and copy constructor altogether.
+
+   Using the extended GNU C++ function-definition syntax, you can avoid
+the temporary allocation and copying by naming `r' as your return value
+at the outset, and assigning to its `a' field directly:
+
+     X
+     m () return r;
+     {
+       r.a = 23;
+     }
+
+The declaration of `r' is a standard, proper declaration, whose effects
+are executed *before* any of the body of `m'.
+
+   Functions of this type impose no additional restrictions; in
+particular, you can execute `return' statements, or return implicitly by
+reaching the end of the function body ("falling off the edge").  Cases
+like
+
+     X
+     m () return r (23);
+     {
+       return;
+     }
+
+(or even `X m () return r (23); { }') are unambiguous, since the return
+value `r' has been initialized in either case.  The following code may
+be hard to read, but also works predictably:
+
+     X
+     m () return r;
+     {
+       X b;
+       return b;
+     }
+
+   The return value slot denoted by `r' is initialized at the outset,
+but the statement `return b;' overrides this value.  The compiler deals
+with this by destroying `r' (calling the destructor if there is one, or
+doing nothing if there is not), and then reinitializing `r' with `b'.
+
+   This extension is provided primarily to help people who use
+overloaded operators, where there is a great need to control not just
+the arguments, but the return values of functions.  For classes where
+the copy constructor incurs a heavy performance penalty (especially in
+the common case where there is a quick default constructor), this is a
+major savings.  The disadvantage of this extension is that you do not
+control when the default constructor for the return value is called: it
+is always called at the beginning.
+
+
+File: gcc.info,  Node: Min and Max,  Next: Destructors and Goto,  Prev: Naming Results,  Up: C++ Extensions
+
+Minimum and Maximum Operators in C++
+====================================
+
+   It is very convenient to have operators which return the "minimum"
+or the "maximum" of two arguments.  In GNU C++ (but not in GNU C),
+
+`A <? B'
+     is the "minimum", returning the smaller of the numeric values A
+     and B;
+
+`A >? B'
+     is the "maximum", returning the larger of the numeric values A and
+     B.
+
+   These operations are not primitive in ordinary C++, since you can
+use a macro to return the minimum of two things in C++, as in the
+following example.
+
+     #define MIN(X,Y) ((X) < (Y) ? : (X) : (Y))
+
+You might then use `int min = MIN (i, j);' to set MIN to the minimum
+value of variables I and J.
+
+   However, side effects in `X' or `Y' may cause unintended behavior.
+For example, `MIN (i++, j++)' will fail, incrementing the smaller
+counter twice.  A GNU C extension allows you to write safe macros that
+avoid this kind of problem (*note Naming an Expression's Type: Naming
+Types.).  However, writing `MIN' and `MAX' as macros also forces you to
+use function-call notation for a fundamental arithmetic operation.
+Using GNU C++ extensions, you can write `int min = i <? j;' instead.
+
+   Since `<?' and `>?' are built into the compiler, they properly
+handle expressions with side-effects;  `int min = i++ <? j++;' works
+correctly.
+
+
+File: gcc.info,  Node: Destructors and Goto,  Next: C++ Interface,  Prev: Min and Max,  Up: C++ Extensions
+
+`goto' and Destructors in GNU C++
+=================================
+
+   In C++ programs, you can safely use the `goto' statement.  When you
+use it to exit a block which contains aggregates requiring destructors,
+the destructors will run before the `goto' transfers control.
+
+   The compiler still forbids using `goto' to *enter* a scope that
+requires constructors.
+
+
+File: gcc.info,  Node: C++ Interface,  Next: Template Instantiation,  Prev: Destructors and Goto,  Up: C++ Extensions
+
+Declarations and Definitions in One Header
+==========================================
+
+   C++ object definitions can be quite complex.  In principle, your
+source code will need two kinds of things for each object that you use
+across more than one source file.  First, you need an "interface"
+specification, describing its structure with type declarations and
+function prototypes.  Second, you need the "implementation" itself.  It
+can be tedious to maintain a separate interface description in a header
+file, in parallel to the actual implementation.  It is also dangerous,
+since separate interface and implementation definitions may not remain
+parallel.
+
+   With GNU C++, you can use a single header file for both purposes.
+
+     *Warning:* The mechanism to specify this is in transition.  For the
+     nonce, you must use one of two `#pragma' commands; in a future
+     release of GNU C++, an alternative mechanism will make these
+     `#pragma' commands unnecessary.
+
+   The header file contains the full definitions, but is marked with
+`#pragma interface' in the source code.  This allows the compiler to
+use the header file only as an interface specification when ordinary
+source files incorporate it with `#include'.  In the single source file
+where the full implementation belongs, you can use either a naming
+convention or `#pragma implementation' to indicate this alternate use
+of the header file.
+
+`#pragma interface'
+`#pragma interface "SUBDIR/OBJECTS.h"'
+     Use this directive in *header files* that define object classes,
+     to save space in most of the object files that use those classes.
+     Normally, local copies of certain information (backup copies of
+     inline member functions, debugging information, and the internal
+     tables that implement virtual functions) must be kept in each
+     object file that includes class definitions.  You can use this
+     pragma to avoid such duplication.  When a header file containing
+     `#pragma interface' is included in a compilation, this auxiliary
+     information will not be generated (unless the main input source
+     file itself uses `#pragma implementation').  Instead, the object
+     files will contain references to be resolved at link time.
+
+     The second form of this directive is useful for the case where you
+     have multiple headers with the same name in different directories.
+     If you use this form, you must specify the same string to `#pragma
+     implementation'.
+
+`#pragma implementation'
+`#pragma implementation "OBJECTS.h"'
+     Use this pragma in a *main input file*, when you want full output
+     from included header files to be generated (and made globally
+     visible).  The included header file, in turn, should use `#pragma
+     interface'.  Backup copies of inline member functions, debugging
+     information, and the internal tables used to implement virtual
+     functions are all generated in implementation files.
+
+     If you use `#pragma implementation' with no argument, it applies to
+     an include file with the same basename(1) as your source file.
+     For example, in `allclass.cc', giving just `#pragma implementation'
+     by itself is equivalent to `#pragma implementation "allclass.h"'.
+
+     In versions of GNU C++ prior to 2.6.0 `allclass.h' was treated as
+     an implementation file whenever you would include it from
+     `allclass.cc' even if you never specified `#pragma
+     implementation'.  This was deemed to be more trouble than it was
+     worth, however, and disabled.
+
+     If you use an explicit `#pragma implementation', it must appear in
+     your source file *before* you include the affected header files.
+
+     Use the string argument if you want a single implementation file to
+     include code from multiple header files.  (You must also use
+     `#include' to include the header file; `#pragma implementation'
+     only specifies how to use the file--it doesn't actually include
+     it.)
+
+     There is no way to split up the contents of a single header file
+     into multiple implementation files.
+
+   `#pragma implementation' and `#pragma interface' also have an effect
+on function inlining.
+
+   If you define a class in a header file marked with `#pragma
+interface', the effect on a function defined in that class is similar to
+an explicit `extern' declaration--the compiler emits no code at all to
+define an independent version of the function.  Its definition is used
+only for inlining with its callers.
+
+   Conversely, when you include the same header file in a main source
+file that declares it as `#pragma implementation', the compiler emits
+code for the function itself; this defines a version of the function
+that can be found via pointers (or by callers compiled without
+inlining).  If all calls to the function can be inlined, you can avoid
+emitting the function by compiling with `-fno-implement-inlines'.  If
+any calls were not inlined, you will get linker errors.
+
+   ---------- Footnotes ----------
+
+   (1) A file's "basename" was the name stripped of all leading path
+information and of trailing suffixes, such as `.h' or `.C' or `.cc'.
+
+
+File: gcc.info,  Node: Template Instantiation,  Next: Bound member functions,  Prev: C++ Interface,  Up: C++ Extensions
+
+Where's the Template?
+=====================
+
+   C++ templates are the first language feature to require more
+intelligence from the environment than one usually finds on a UNIX
+system.  Somehow the compiler and linker have to make sure that each
+template instance occurs exactly once in the executable if it is needed,
+and not at all otherwise.  There are two basic approaches to this
+problem, which I will refer to as the Borland model and the Cfront
+model.
+
+Borland model
+     Borland C++ solved the template instantiation problem by adding
+     the code equivalent of common blocks to their linker; the compiler
+     emits template instances in each translation unit that uses them,
+     and the linker collapses them together.  The advantage of this
+     model is that the linker only has to consider the object files
+     themselves; there is no external complexity to worry about.  This
+     disadvantage is that compilation time is increased because the
+     template code is being compiled repeatedly.  Code written for this
+     model tends to include definitions of all templates in the header
+     file, since they must be seen to be instantiated.
+
+Cfront model
+     The AT&T C++ translator, Cfront, solved the template instantiation
+     problem by creating the notion of a template repository, an
+     automatically maintained place where template instances are
+     stored.  A more modern version of the repository works as follows:
+     As individual object files are built, the compiler places any
+     template definitions and instantiations encountered in the
+     repository.  At link time, the link wrapper adds in the objects in
+     the repository and compiles any needed instances that were not
+     previously emitted.  The advantages of this model are more optimal
+     compilation speed and the ability to use the system linker; to
+     implement the Borland model a compiler vendor also needs to
+     replace the linker.  The disadvantages are vastly increased
+     complexity, and thus potential for error; for some code this can be
+     just as transparent, but in practice it can been very difficult to
+     build multiple programs in one directory and one program in
+     multiple directories.  Code written for this model tends to
+     separate definitions of non-inline member templates into a
+     separate file, which should be compiled separately.
+
+   When used with GNU ld version 2.8 or later on an ELF system such as
+Linux/GNU or Solaris 2, or on Microsoft Windows, g++ supports the
+Borland model.  On other systems, g++ implements neither automatic
+model.
+
+   A future version of g++ will support a hybrid model whereby the
+compiler will emit any instantiations for which the template definition
+is included in the compile, and store template definitions and
+instantiation context information into the object file for the rest.
+The link wrapper will extract that information as necessary and invoke
+the compiler to produce the remaining instantiations.  The linker will
+then combine duplicate instantiations.
+
+   In the mean time, you have the following options for dealing with
+template instantiations:
+
+  1. Compile your template-using code with `-frepo'.  The compiler will
+     generate files with the extension `.rpo' listing all of the
+     template instantiations used in the corresponding object files
+     which could be instantiated there; the link wrapper, `collect2',
+     will then update the `.rpo' files to tell the compiler where to
+     place those instantiations and rebuild any affected object files.
+     The link-time overhead is negligible after the first pass, as the
+     compiler will continue to place the instantiations in the same
+     files.
+
+     This is your best option for application code written for the
+     Borland model, as it will just work.  Code written for the Cfront
+     model will need to be modified so that the template definitions
+     are available at one or more points of instantiation; usually this
+     is as simple as adding `#include <tmethods.cc>' to the end of each
+     template header.
+
+     For library code, if you want the library to provide all of the
+     template instantiations it needs, just try to link all of its
+     object files together; the link will fail, but cause the
+     instantiations to be generated as a side effect.  Be warned,
+     however, that this may cause conflicts if multiple libraries try
+     to provide the same instantiations.  For greater control, use
+     explicit instantiation as described in the next option.
+
+  2. Compile your code with `-fno-implicit-templates' to disable the
+     implicit generation of template instances, and explicitly
+     instantiate all the ones you use.  This approach requires more
+     knowledge of exactly which instances you need than do the others,
+     but it's less mysterious and allows greater control.  You can
+     scatter the explicit instantiations throughout your program,
+     perhaps putting them in the translation units where the instances
+     are used or the translation units that define the templates
+     themselves; you can put all of the explicit instantiations you
+     need into one big file; or you can create small files like
+
+          #include "Foo.h"
+          #include "Foo.cc"
+          
+          template class Foo<int>;
+          template ostream& operator <<
+                          (ostream&, const Foo<int>&);
+
+     for each of the instances you need, and create a template
+     instantiation library from those.
+
+     If you are using Cfront-model code, you can probably get away with
+     not using `-fno-implicit-templates' when compiling files that don't
+     `#include' the member template definitions.
+
+     If you use one big file to do the instantiations, you may want to
+     compile it without `-fno-implicit-templates' so you get all of the
+     instances required by your explicit instantiations (but not by any
+     other files) without having to specify them as well.
+
+     g++ has extended the template instantiation syntax outlined in the
+     Working Paper to allow forward declaration of explicit
+     instantiations and instantiation of the compiler support data for
+     a template class (i.e. the vtable) without instantiating any of
+     its members:
+
+          extern template int max (int, int);
+          inline template class Foo<int>;
+
+  3. Do nothing.  Pretend g++ does implement automatic instantiation
+     management.  Code written for the Borland model will work fine, but
+     each translation unit will contain instances of each of the
+     templates it uses.  In a large program, this can lead to an
+     unacceptable amount of code duplication.
+
+  4. Add `#pragma interface' to all files containing template
+     definitions.  For each of these files, add `#pragma implementation
+     "FILENAME"' to the top of some `.C' file which `#include's it.
+     Then compile everything with `-fexternal-templates'.  The
+     templates will then only be expanded in the translation unit which
+     implements them (i.e. has a `#pragma implementation' line for the
+     file where they live); all other files will use external
+     references.  If you're lucky, everything should work properly.  If
+     you get undefined symbol errors, you need to make sure that each
+     template instance which is used in the program is used in the file
+     which implements that template.  If you don't have any use for a
+     particular instance in that file, you can just instantiate it
+     explicitly, using the syntax from the latest C++ working paper:
+
+          template class A<int>;
+          template ostream& operator << (ostream&, const A<int>&);
+
+     This strategy will work with code written for either model.  If
+     you are using code written for the Cfront model, the file
+     containing a class template and the file containing its member
+     templates should be implemented in the same translation unit.
+
+     A slight variation on this approach is to instead use the flag
+     `-falt-external-templates'; this flag causes template instances to
+     be emitted in the translation unit that implements the header
+     where they are first instantiated, rather than the one which
+     implements the file where the templates are defined.  This header
+     must be the same in all translation units, or things are likely to
+     break.
+
+     *Note Declarations and Definitions in One Header: C++ Interface,
+     for more discussion of these pragmas.
+
+
+File: gcc.info,  Node: Bound member functions,  Next: C++ Signatures,  Prev: Template Instantiation,  Up: C++ Extensions
+
+Extracting the function pointer from a bound pointer to member function
+=======================================================================
+
+   In C++, pointer to member functions (PMFs) are implemented using a
+wide pointer of sorts to handle all the possible call mechanisms; the
+PMF needs to store information about how to adjust the `this' pointer,
+and if the function pointed to is virtual, where to find the vtable, and
+where in the vtable to look for the member function.  If you are using
+PMFs in an inner loop, you should really reconsider that decision.  If
+that is not an option, you can extract the pointer to the function that
+would be called for a given object/PMF pair and call it directly inside
+the inner loop, to save a bit of time.
+
+   Note that you will still be paying the penalty for the call through a
+function pointer; on most modern architectures, such a call defeats the
+branch prediction features of the CPU.  This is also true of normal
+virtual function calls.
+
+   The syntax for this extension is
+
+     extern A a;
+     extern int (A::*fp)();
+     typedef int (*fptr)(A *);
+     
+     fptr p = (fptr)(a.*fp);
+
+   You must specify `-Wno-pmf-conversions' to use this extension.
+
+
+File: gcc.info,  Node: C++ Signatures,  Prev: Bound member functions,  Up: C++ Extensions
+
+Type Abstraction using Signatures
+=================================
+
+   In GNU C++, you can use the keyword `signature' to define a
+completely abstract class interface as a datatype.  You can connect this
+abstraction with actual classes using signature pointers.  If you want
+to use signatures, run the GNU compiler with the `-fhandle-signatures'
+command-line option.  (With this option, the compiler reserves a second
+keyword `sigof' as well, for a future extension.)
+
+   Roughly, signatures are type abstractions or interfaces of classes.
+Some other languages have similar facilities.  C++ signatures are
+related to ML's signatures, Haskell's type classes, definition modules
+in Modula-2, interface modules in Modula-3, abstract types in Emerald,
+type modules in Trellis/Owl, categories in Scratchpad II, and types in
+POOL-I.  For a more detailed discussion of signatures, see `Signatures:
+A Language Extension for Improving Type Abstraction and Subtype
+Polymorphism in C++' by Gerald Baumgartner and Vincent F. Russo (Tech
+report CSD-TR-95-051, Dept. of Computer Sciences, Purdue University,
+August 1995, a slightly improved version appeared in
+*Software--Practice & Experience*, 25(8), pp. 863-889, August 1995).
+You can get the tech report by anonymous FTP from `ftp.cs.purdue.edu'
+in `pub/gb/Signature-design.ps.gz'.
+
+   Syntactically, a signature declaration is a collection of member
+function declarations and nested type declarations.  For example, this
+signature declaration defines a new abstract type `S' with member
+functions `int foo ()' and `int bar (int)':
+
+     signature S
+     {
+       int foo ();
+       int bar (int);
+     };
+
+   Since signature types do not include implementation definitions, you
+cannot write an instance of a signature directly.  Instead, you can
+define a pointer to any class that contains the required interfaces as a
+"signature pointer".  Such a class "implements" the signature type.
+
+   To use a class as an implementation of `S', you must ensure that the
+class has public member functions `int foo ()' and `int bar (int)'.
+The class can have other member functions as well, public or not; as
+long as it offers what's declared in the signature, it is suitable as
+an implementation of that signature type.
+
+   For example, suppose that `C' is a class that meets the requirements
+of signature `S' (`C' "conforms to" `S').  Then
+
+     C obj;
+     S * p = &obj;
+
+defines a signature pointer `p' and initializes it to point to an
+object of type `C'.  The member function call `int i = p->foo ();'
+executes `obj.foo ()'.
+
+   Abstract virtual classes provide somewhat similar facilities in
+standard C++.  There are two main advantages to using signatures
+instead:
+
+  1. Subtyping becomes independent from inheritance.  A class or
+     signature type `T' is a subtype of a signature type `S'
+     independent of any inheritance hierarchy as long as all the member
+     functions declared in `S' are also found in `T'.  So you can
+     define a subtype hierarchy that is completely independent from any
+     inheritance (implementation) hierarchy, instead of being forced to
+     use types that mirror the class inheritance hierarchy.
+
+  2. Signatures allow you to work with existing class hierarchies as
+     implementations of a signature type.  If those class hierarchies
+     are only available in compiled form, you're out of luck with
+     abstract virtual classes, since an abstract virtual class cannot
+     be retrofitted on top of existing class hierarchies.  So you would
+     be required to write interface classes as subtypes of the abstract
+     virtual class.
+
+   There is one more detail about signatures.  A signature declaration
+can contain member function *definitions* as well as member function
+declarations.  A signature member function with a full definition is
+called a *default implementation*; classes need not contain that
+particular interface in order to conform.  For example, a class `C' can
+conform to the signature
+
+     signature T
+     {
+       int f (int);
+       int f0 () { return f (0); };
+     };
+
+whether or not `C' implements the member function `int f0 ()'.  If you
+define `C::f0', that definition takes precedence; otherwise, the
+default implementation `S::f0' applies.
+
+
+File: gcc.info,  Node: Gcov,  Next: Trouble,  Prev: C++ Extensions,  Up: Top
+
+`gcov': a Test Coverage Program
+*******************************
+
+   `gcov' is a tool you can use in conjunction with GNU CC to test code
+coverage in your programs.
+
+   This chapter describes version 1.5 of `gcov'.
+
+* Menu:
+
+* Gcov Intro::         	        Introduction to gcov.
+* Invoking Gcov::       	How to use gcov.
+* Gcov and Optimization::       Using gcov with GCC optimization.
+* Gcov Data Files::             The files used by gcov.
+
+
+File: gcc.info,  Node: Gcov Intro,  Next: Invoking Gcov,  Up: Gcov
+
+Introduction to `gcov'
+======================
+
+   `gcov' is a test coverage program.  Use it in concert with GNU CC to
+analyze your programs to help create more efficient, faster running
+code.  You can use `gcov' as a profiling tool to help discover where
+your optimization efforts will best affect your code.  You can also use
+`gcov' along with the other profiling tool, `gprof', to assess which
+parts of your code use the greatest amount of computing time.
+
+   Profiling tools help you analyze your code's performance.  Using a
+profiler such as `gcov' or `gprof', you can find out some basic
+performance statistics, such as:
+
+   * how often each line of code executes
+
+   * what lines of code are actually executed
+
+   * how much computing time each section of code uses
+
+   Once you know these things about how your code works when compiled,
+you can look at each module to see which modules should be optimized.
+`gcov' helps you determine where to work on optimization.
+
+   Software developers also use coverage testing in concert with
+testsuites, to make sure software is actually good enough for a release.
+Testsuites can verify that a program works as expected; a coverage
+program tests to see how much of the program is exercised by the
+testsuite.  Developers can then determine what kinds of test cases need
+to be added to the testsuites to create both better testing and a better
+final product.
+
+   You should compile your code without optimization if you plan to use
+`gcov' because the optimization, by combining some lines of code into
+one function, may not give you as much information as you need to look
+for `hot spots' where the code is using a great deal of computer time.
+Likewise, because `gcov' accumulates statistics by line (at the lowest
+resolution), it works best with a programming style that places only
+one statement on each line.  If you use complicated macros that expand
+to loops or to other control structures, the statistics are less
+helpful--they only report on the line where the macro call appears.  If
+your complex macros behave like functions, you can replace them with
+inline functions to solve this problem.
+
+   `gcov' creates a logfile called `SOURCEFILE.gcov' which indicates
+how many times each line of a source file `SOURCEFILE.c' has executed.
+You can use these logfiles along with `gprof' to aid in fine-tuning the
+performance of your programs.  `gprof' gives timing information you can
+use along with the information you get from `gcov'.
+
+   `gcov' works only on code compiled with GNU CC.  It is not
+compatible with any other profiling or test coverage mechanism.
+
+
+File: gcc.info,  Node: Invoking Gcov,  Next: Gcov and Optimization,  Prev: Gcov Intro,  Up: Gcov
+
+Invoking gcov
+=============
+
+     gcov [-b] [-v] [-n] [-l] [-f] [-o directory] SOURCEFILE
+
+`-b'
+     Write branch frequencies to the output file, and write branch
+     summary info to the standard output.  This option allows you to
+     see how often each branch in your program was taken.
+
+`-v'
+     Display the `gcov' version number (on the standard error stream).
+
+`-n'
+     Do not create the `gcov' output file.
+
+`-l'
+     Create long file names for included source files.  For example, if
+     the header file `x.h' contains code, and was included in the file
+     `a.c', then running `gcov' on the file `a.c' will produce an
+     output file called `a.c.x.h.gcov' instead of `x.h.gcov'.  This can
+     be useful if `x.h' is included in multiple source files.
+
+`-f'
+     Output summaries for each function in addition to the file level
+     summary.
+
+`-o'
+     The directory where the object files live.  Gcov will search for
+     `.bb', `.bbg', and `.da' files in this directory.
+
+   When using `gcov', you must first compile your program with two
+special GNU CC options: `-fprofile-arcs -ftest-coverage'.  This tells
+the compiler to generate additional information needed by gcov
+(basically a flow graph of the program) and also includes additional
+code in the object files for generating the extra profiling information
+needed by gcov.  These additional files are placed in the directory
+where the source code is located.
+
+   Running the program will cause profile output to be generated.  For
+each source file compiled with -fprofile-arcs, an accompanying `.da'
+file will be placed in the source directory.
+
+   Running `gcov' with your program's source file names as arguments
+will now produce a listing of the code along with frequency of execution
+for each line.  For example, if your program is called `tmp.c', this is
+what you see when you use the basic `gcov' facility:
+
+     $ gcc -fprofile-arcs -ftest-coverage tmp.c
+     $ a.out
+     $ gcov tmp.c
+      87.50% of 8 source lines executed in file tmp.c
+     Creating tmp.c.gcov.
+
+   The file `tmp.c.gcov' contains output from `gcov'.  Here is a sample:
+
+                     main()
+                     {
+                1      int i, total;
+     
+                1      total = 0;
+     
+               11      for (i = 0; i < 10; i++)
+               10        total += i;
+     
+                1      if (total != 45)
+           ######        printf ("Failure\n");
+                       else
+                1        printf ("Success\n");
+                1    }
+
+   When you use the `-b' option, your output looks like this:
+
+     $ gcov -b tmp.c
+      87.50% of 8 source lines executed in file tmp.c
+      80.00% of 5 branches executed in file tmp.c
+      80.00% of 5 branches taken at least once in file tmp.c
+      50.00% of 2 calls executed in file tmp.c
+     Creating tmp.c.gcov.
+
+   Here is a sample of a resulting `tmp.c.gcov' file:
+
+                     main()
+                     {
+                1      int i, total;
+     
+                1      total = 0;
+     
+               11      for (i = 0; i < 10; i++)
+     branch 0 taken = 91%
+     branch 1 taken = 100%
+     branch 2 taken = 100%
+               10        total += i;
+     
+                1      if (total != 45)
+     branch 0 taken = 100%
+           ######        printf ("Failure\n");
+     call 0 never executed
+     branch 1 never executed
+                       else
+                1        printf ("Success\n");
+     call 0 returns = 100%
+                1    }
+
+   For each basic block, a line is printed after the last line of the
+basic block describing the branch or call that ends the basic block.
+There can be multiple branches and calls listed for a single source
+line if there are multiple basic blocks that end on that line.  In this
+case, the branches and calls are each given a number.  There is no
+simple way to map these branches and calls back to source constructs.
+In general, though, the lowest numbered branch or call will correspond
+to the leftmost construct on the source line.
+
+   For a branch, if it was executed at least once, then a percentage
+indicating the number of times the branch was taken divided by the
+number of times the branch was executed will be printed.  Otherwise, the
+message "never executed" is printed.
+
+   For a call, if it was executed at least once, then a percentage
+indicating the number of times the call returned divided by the number
+of times the call was executed will be printed.  This will usually be
+100%, but may be less for functions call `exit' or `longjmp', and thus
+may not return everytime they are called.
+
+   The execution counts are cumulative.  If the example program were
+executed again without removing the `.da' file, the count for the
+number of times each line in the source was executed would be added to
+the results of the previous run(s).  This is potentially useful in
+several ways.  For example, it could be used to accumulate data over a
+number of program runs as part of a test verification suite, or to
+provide more accurate long-term information over a large number of
+program runs.
+
+   The data in the `.da' files is saved immediately before the program
+exits.  For each source file compiled with -fprofile-arcs, the profiling
+code first attempts to read in an existing `.da' file; if the file
+doesn't match the executable (differing number of basic block counts) it
+will ignore the contents of the file.  It then adds in the new execution
+counts and finally writes the data to the file.
+
+
+File: gcc.info,  Node: Gcov and Optimization,  Next: Gcov Data Files,  Prev: Invoking Gcov,  Up: Gcov
+
+Using `gcov' with GCC Optimization
+==================================
+
+   If you plan to use `gcov' to help optimize your code, you must first
+compile your program with two special GNU CC options: `-fprofile-arcs
+-ftest-coverage'.  Aside from that, you can use any other GNU CC
+options; but if you want to prove that every single line in your
+program was executed, you should not compile with optimization at the
+same time.  On some machines the optimizer can eliminate some simple
+code lines by combining them with other lines.  For example, code like
+this:
+
+     if (a != b)
+       c = 1;
+     else
+       c = 0;
+
+can be compiled into one instruction on some machines.  In this case,
+there is no way for `gcov' to calculate separate execution counts for
+each line because there isn't separate code for each line.  Hence the
+`gcov' output looks like this if you compiled the program with
+optimization:
+
+           100  if (a != b)
+           100    c = 1;
+           100  else
+           100    c = 0;
+
+   The output shows that this block of code, combined by optimization,
+executed 100 times.  In one sense this result is correct, because there
+was only one instruction representing all four of these lines.  However,
+the output does not indicate how many times the result was 0 and how
+many times the result was 1.
+
+
+File: gcc.info,  Node: Gcov Data Files,  Prev: Gcov and Optimization,  Up: Gcov
+
+Brief description of `gcov' data files
+======================================
+
+   `gcov' uses three files for doing profiling.  The names of these
+files are derived from the original *source* file by substituting the
+file suffix with either `.bb', `.bbg', or `.da'.  All of these files
+are placed in the same directory as the source file, and contain data
+stored in a platform-independent method.
+
+   The `.bb' and `.bbg' files are generated when the source file is
+compiled with the GNU CC `-ftest-coverage' option.  The `.bb' file
+contains a list of source files (including headers), functions within
+those files, and line numbers corresponding to each basic block in the
+source file.
+
+   The `.bb' file format consists of several lists of 4-byte integers
+which correspond to the line numbers of each basic block in the file.
+Each list is terminated by a line number of 0.  A line number of -1 is
+used to designate that the source file name (padded to a 4-byte
+boundary and followed by another -1) follows.  In addition, a line
+number of -2 is used to designate that the name of a function (also
+padded to a 4-byte boundary and followed by a -2) follows.
+
+   The `.bbg' file is used to reconstruct the program flow graph for
+the source file.  It contains a list of the program flow arcs (possible
+branches taken from one basic block to another) for each function which,
+in combination with the `.bb' file, enables gcov to reconstruct the
+program flow.
+
+   In the `.bbg' file, the format is:
+             number of basic blocks for function #0 (4-byte number)
+             total number of arcs for function #0 (4-byte number)
+             count of arcs in basic block #0 (4-byte number)
+             destination basic block of arc #0 (4-byte number)
+             flag bits (4-byte number)
+             destination basic block of arc #1 (4-byte number)
+             flag bits (4-byte number)
+             ...
+             destination basic block of arc #N (4-byte number)
+             flag bits (4-byte number)
+             count of arcs in basic block #1 (4-byte number)
+             destination basic block of arc #0 (4-byte number)
+             flag bits (4-byte number)
+             ...
+
+   A -1 (stored as a 4-byte number) is used to separate each function's
+list of basic blocks, and to verify that the file has been read
+correctly.
+
+   The `.da' file is generated when a program containing object files
+built with the GNU CC `-fprofile-arcs' option is executed.  A separate
+`.da' file is created for each source file compiled with this option,
+and the name of the `.da' file is stored as an absolute pathname in the
+resulting object file.  This path name is derived from the source file
+name by substituting a `.da' suffix.
+
+   The format of the `.da' file is fairly simple.  The first 8-byte
+number is the number of counts in the file, followed by the counts
+(stored as 8-byte numbers).  Each count corresponds to the number of
+times each arc in the program is executed.  The counts are cumulative;
+each time the program is executed, it attemps to combine the existing
+`.da' files with the new counts for this invocation of the program.  It
+ignores the contents of any `.da' files whose number of arcs doesn't
+correspond to the current program, and merely overwrites them instead.
+
+   All three of these files use the functions in `gcov-io.h' to store
+integers; the functions in this header provide a machine-independent
+mechanism for storing and retrieving data from a stream.
+
+
+File: gcc.info,  Node: Trouble,  Next: Bugs,  Prev: Gcov,  Up: Top
+
+Known Causes of Trouble with GCC
+********************************
+
+   This section describes known problems that affect users of GCC.  Most
+of these are not GCC bugs per se--if they were, we would fix them.  But
+the result for a user may be like the result of a bug.
+
+   Some of these problems are due to bugs in other software, some are
+missing features that are too much work to add, and some are places
+where people's opinions differ as to what is best.
+
+* Menu:
+
+* Actual Bugs::		      Bugs we will fix later.
+* Installation Problems::     Problems that manifest when you install GCC.
+* Cross-Compiler Problems::   Common problems of cross compiling with GCC.
+* Interoperation::      Problems using GCC with other compilers,
+			   and with certain linkers, assemblers and debuggers.
+* External Bugs::	Problems compiling certain programs.
+* Incompatibilities::   GCC is incompatible with traditional C.
+* Fixed Headers::       GNU C uses corrected versions of system header files.
+                           This is necessary, but doesn't always work smoothly.
+* Standard Libraries::  GNU C uses the system C library, which might not be
+                           compliant with the ISO/ANSI C standard.
+* Disappointments::     Regrettable things we can't change, but not quite bugs.
+* C++ Misunderstandings::     Common misunderstandings with GNU C++.
+* Protoize Caveats::    Things to watch out for when using `protoize'.
+* Non-bugs::		Things we think are right, but some others disagree.
+* Warnings and Errors:: Which problems in your code get warnings,
+                         and which get errors.
+
+
+File: gcc.info,  Node: Actual Bugs,  Next: Installation Problems,  Up: Trouble
+
+Actual Bugs We Haven't Fixed Yet
+================================
+
+   * The `fixincludes' script interacts badly with automounters; if the
+     directory of system header files is automounted, it tends to be
+     unmounted while `fixincludes' is running.  This would seem to be a
+     bug in the automounter.  We don't know any good way to work around
+     it.
+
+   * The `fixproto' script will sometimes add prototypes for the
+     `sigsetjmp' and `siglongjmp' functions that reference the
+     `jmp_buf' type before that type is defined.  To work around this,
+     edit the offending file and place the typedef in front of the
+     prototypes.
+
+   * There are several obscure case of mis-using struct, union, and
+     enum tags that are not detected as errors by the compiler.
+
+   * When `-pedantic-errors' is specified, GCC will incorrectly give an
+     error message when a function name is specified in an expression
+     involving the comma operator.
+
+   * Loop unrolling doesn't work properly for certain C++ programs.
+     This is a bug in the C++ front end.  It sometimes emits incorrect
+     debug info, and the loop unrolling code is unable to recover from
+     this error.
+

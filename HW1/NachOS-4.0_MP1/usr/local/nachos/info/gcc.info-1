@@ -1,0 +1,954 @@
+This is Info file gcc.info, produced by Makeinfo version 1.68 from the
+input file ../../gcc-2.95.2/gcc/gcc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* gcc: (gcc).                  The GNU Compiler Collection.
+END-INFO-DIR-ENTRY
+   This file documents the use and the internals of the GNU compiler.
+
+   Published by the Free Software Foundation 59 Temple Place - Suite 330
+Boston, MA 02111-1307 USA
+
+   Copyright (C) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+1999 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the sections entitled "GNU General Public License" and "Funding
+for Free Software" are included exactly as in the original, and
+provided that the entire resulting derived work is distributed under
+the terms of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that the sections entitled "GNU General Public
+License" and "Funding for Free Software", and this permission notice,
+may be included in translations approved by the Free Software Foundation
+instead of in the original English.
+
+
+File: gcc.info,  Node: Top,  Next: G++ and GCC,  Up: (DIR)
+
+Introduction
+************
+
+   This manual documents how to run, install and port the GNU compiler,
+as well as its new features and incompatibilities, and how to report
+bugs.  It corresponds to GCC version 2.95.
+
+* Menu:
+
+
+* G++ and GCC::     You can compile C or C++ programs.
+* Invoking GCC::    Command options supported by `gcc'.
+* Installation::    How to configure, compile and install GCC.
+* C Extensions::    GNU extensions to the C language family.
+* C++ Extensions::  GNU extensions to the C++ language.
+* Gcov::	    gcov: a GCC test coverage program.
+* Trouble::         If you have trouble installing GCC.
+* Bugs::            How, why and where to report bugs.
+* Service::         How to find suppliers of support for GCC.
+* Contributing::    How to contribute to testing and developing GCC.
+* VMS::             Using GCC on VMS.
+
+* Portability::     Goals of GCC's portability features.
+* Interface::       Function-call interface of GCC output.
+* Passes::          Order of passes, what they do, and what each file is for.
+* RTL::             The intermediate representation that most passes work on.
+* Machine Desc::    How to write machine description instruction patterns.
+* Target Macros::   How to write the machine description C macros.
+* Config::          Writing the `xm-MACHINE.h' file.
+* Fragments::       Writing the `t-TARGET' and `x-HOST' files.
+
+* Funding::         How to help assure funding for free software.
+* GNU/Linux::       Linux and the GNU Project
+
+* Copying::         GNU General Public License says
+                     how you can copy and share GCC.
+* Contributors::    People who have contributed to GCC.
+
+* Index::	    Index of concepts and symbol names.
+
+
+File: gcc.info,  Node: G++ and GCC,  Next: Invoking GCC,  Prev: Top,  Up: Top
+
+Compile C, C++, Objective C, or Fortran
+***************************************
+
+   The C, C++, and Objective C, and Fortran versions of the compiler are
+integrated; this is why we use the name "GNU Compiler Collection".  GCC
+can compile programs written in C, C++, Objective C, or Fortran.  The
+Fortran compiler is described in a separate manual.
+
+   "GCC" is a common shorthand term for the GNU Compiler Collection.
+This is both the most general name for the compiler, and the name used
+when the emphasis is on compiling C programs (as the abbreviation
+formerly stood for "GNU C Compiler").
+
+   When referring to C++ compilation, it is usual to call the compiler
+"G++".  Since there is only one compiler, it is also accurate to call
+it "GCC" no matter what the language context; however, the term "G++"
+is more useful when the emphasis is on compiling C++ programs.
+
+   We use the name "GCC" to refer to the compilation system as a whole,
+and more specifically to the language-independent part of the compiler.
+For example, we refer to the optimization options as affecting the
+behavior of "GCC" or sometimes just "the compiler".
+
+   Front ends for other languages, such as Ada 9X, Fortran, Modula-3,
+and Pascal, are under development.  These front-ends, like that for
+C++, are built in subdirectories of GCC and link to it.  The result is
+an integrated compiler that can compile programs written in C, C++,
+Objective C, or any of the languages for which you have installed front
+ends.
+
+   In this manual, we only discuss the options for the C, Objective-C,
+and C++ compilers and those of the GCC core.  Consult the documentation
+of the other front ends for the options to use when compiling programs
+written in other languages.
+
+   G++ is a *compiler*, not merely a preprocessor.  G++ builds object
+code directly from your C++ program source.  There is no intermediate C
+version of the program.  (By contrast, for example, some other
+implementations use a program that generates a C program from your C++
+source.)  Avoiding an intermediate C representation of the program means
+that you get better object code, and better debugging information.  The
+GNU debugger, GDB, works with this information in the object code to
+give you comprehensive C++ source-level editing capabilities (*note C
+and C++: (gdb.info)C.).
+
+
+File: gcc.info,  Node: Invoking GCC,  Next: Installation,  Prev: G++ and GCC,  Up: Top
+
+GCC Command Options
+*******************
+
+   When you invoke GCC, it normally does preprocessing, compilation,
+assembly and linking.  The "overall options" allow you to stop this
+process at an intermediate stage.  For example, the `-c' option says
+not to run the linker.  Then the output consists of object files output
+by the assembler.
+
+   Other options are passed on to one stage of processing.  Some options
+control the preprocessor and others the compiler itself.  Yet other
+options control the assembler and linker; most of these are not
+documented here, since you rarely need to use any of them.
+
+   Most of the command line options that you can use with GCC are useful
+for C programs; when an option is only useful with another language
+(usually C++), the explanation says so explicitly.  If the description
+for a particular option does not mention a source language, you can use
+that option with all supported languages.
+
+   *Note Compiling C++ Programs: Invoking G++, for a summary of special
+options for compiling C++ programs.
+
+   The `gcc' program accepts options and file names as operands.  Many
+options have multiletter names; therefore multiple single-letter options
+may *not* be grouped: `-dr' is very different from `-d -r'.
+
+   You can mix options and other arguments.  For the most part, the
+order you use doesn't matter.  Order does matter when you use several
+options of the same kind; for example, if you specify `-L' more than
+once, the directories are searched in the order specified.
+
+   Many options have long names starting with `-f' or with `-W'--for
+example, `-fforce-mem', `-fstrength-reduce', `-Wformat' and so on.
+Most of these have both positive and negative forms; the negative form
+of `-ffoo' would be `-fno-foo'.  This manual documents only one of
+these two forms, whichever one is not the default.
+
+* Menu:
+
+* Option Summary::	Brief list of all options, without explanations.
+* Overall Options::     Controlling the kind of output:
+                        an executable, object files, assembler files,
+                        or preprocessed source.
+* Invoking G++::	Compiling C++ programs.
+* C Dialect Options::   Controlling the variant of C language compiled.
+* C++ Dialect Options:: Variations on C++.
+* Warning Options::     How picky should the compiler be?
+* Debugging Options::   Symbol tables, measurements, and debugging dumps.
+* Optimize Options::    How much optimization?
+* Preprocessor Options:: Controlling header files and macro definitions.
+                         Also, getting dependency information for Make.
+* Assembler Options::   Passing options to the assembler.
+* Link Options::        Specifying libraries and so on.
+* Directory Options::   Where to find header files and libraries.
+                        Where to find the compiler executable files.
+* Target Options::      Running a cross-compiler, or an old version of GCC.
+* Submodel Options::    Specifying minor hardware or convention variations,
+                        such as 68010 vs 68020.
+* Code Gen Options::    Specifying conventions for function calls, data layout
+                        and register usage.
+* Environment Variables:: Env vars that affect GCC.
+* Running Protoize::    Automatically adding or removing function prototypes.
+
+
+File: gcc.info,  Node: Option Summary,  Next: Overall Options,  Up: Invoking GCC
+
+Option Summary
+==============
+
+   Here is a summary of all the options, grouped by type.  Explanations
+are in the following sections.
+
+*Overall Options*
+     *Note Options Controlling the Kind of Output: Overall Options.
+          -c  -S  -E  -o FILE  -pipe  -v  --help  -x LANGUAGE
+
+*C Language Options*
+     *Note Options Controlling C Dialect: C Dialect Options.
+          -ansi -flang-isoc9x -fallow-single-precision  -fcond-mismatch  -fno-asm
+          -fno-builtin  -ffreestanding  -fhosted  -fsigned-bitfields  -fsigned-char
+          -funsigned-bitfields  -funsigned-char  -fwritable-strings
+          -traditional  -traditional-cpp  -trigraphs
+
+*C++ Language Options*
+     *Note Options Controlling C++ Dialect: C++ Dialect Options.
+          -fno-access-control  -fcheck-new  -fconserve-space  -fdollars-in-identifiers
+          -fno-elide-constructors  -fexternal-templates  -ffor-scope
+          -fno-for-scope  -fno-gnu-keywords  -fguiding-decls  -fhandle-signatures
+          -fhonor-std -fhuge-objects  -fno-implicit-templates  -finit-priority
+          -fno-implement-inlines -fname-mangling-version-N  -fno-default-inline
+          -foperator-names  -fno-optional-diags  -fpermissive -frepo  -fstrict-prototype
+          -fsquangle  -ftemplate-depth-N  -fthis-is-variable  -fvtable-thunks
+          -nostdinc++  -Wctor-dtor-privacy -Wno-deprecated -Weffc++
+          -Wno-non-template-friend
+          -Wnon-virtual-dtor  -Wold-style-cast  -Woverloaded-virtual
+          -Wno-pmf-conversions  -Wreorder  -Wsign-promo  -Wsynth
+
+*Warning Options*
+     *Note Options to Request or Suppress Warnings: Warning Options.
+          -fsyntax-only  -pedantic  -pedantic-errors
+          -w  -W  -Wall  -Waggregate-return  -Wbad-function-cast
+          -Wcast-align  -Wcast-qual  -Wchar-subscripts  -Wcomment
+          -Wconversion  -Werror  -Wformat
+          -Wid-clash-LEN  -Wimplicit -Wimplicit-int
+          -Wimplicit-function-declaration  -Wimport
+          -Werror-implicit-function-declaration  -Winline
+          -Wlarger-than-LEN  -Wlong-long
+          -Wmain  -Wmissing-declarations  -Wmissing-noreturn
+          -Wmissing-prototypes  -Wmultichar  -Wnested-externs  -Wno-import
+          -Wparentheses -Wpointer-arith  -Wredundant-decls
+          -Wreturn-type -Wshadow  -Wsign-compare  -Wstrict-prototypes
+          -Wswitch  -Wtraditional
+          -Wtrigraphs -Wundef  -Wuninitialized  -Wunused  -Wwrite-strings
+          -Wunknown-pragmas
+
+*Debugging Options*
+     *Note Options for Debugging Your Program or GCC: Debugging Options.
+          -a  -ax  -dLETTERS  -fdump-unnumbered -fpretend-float
+          -fprofile-arcs  -ftest-coverage
+          -g  -gLEVEL  -gcoff  -gdwarf  -gdwarf-1  -gdwarf-1+  -gdwarf-2
+          -ggdb  -gstabs  -gstabs+  -gxcoff  -gxcoff+
+          -p  -pg  -print-file-name=LIBRARY  -print-libgcc-file-name
+          -print-prog-name=PROGRAM  -print-search-dirs  -save-temps
+
+*Optimization Options*
+     *Note Options that Control Optimization: Optimize Options.
+          -fbranch-probabilities  -foptimize-register-moves
+          -fcaller-saves  -fcse-follow-jumps  -fcse-skip-blocks
+          -fdelayed-branch   -fexpensive-optimizations
+          -ffast-math  -ffloat-store  -fforce-addr  -fforce-mem
+          -fdata-sections -ffunction-sections  -fgcse
+          -finline-functions -finline-limit-N -fkeep-inline-functions
+          -fno-default-inline -fno-defer-pop  -fno-function-cse
+          -fno-inline  -fno-peephole  -fomit-frame-pointer -fregmove
+          -frerun-cse-after-loop  -frerun-loop-opt -fschedule-insns
+          -fschedule-insns2  -fstrength-reduce  -fthread-jumps
+          -funroll-all-loops  -funroll-loops
+          -fmove-all-movables  -freduce-all-givs -fstrict-aliasing
+          -O  -O0  -O1  -O2  -O3 -Os
+
+*Preprocessor Options*
+     *Note Options Controlling the Preprocessor: Preprocessor Options.
+          -AQUESTION(ANSWER)  -C  -dD  -dM  -dN
+          -DMACRO[=DEFN]  -E  -H
+          -idirafter DIR
+          -include FILE  -imacros FILE
+          -iprefix FILE  -iwithprefix DIR
+          -iwithprefixbefore DIR  -isystem DIR -isystem-c++ DIR
+          -M  -MD  -MM  -MMD  -MG  -nostdinc  -P  -trigraphs
+          -undef  -UMACRO  -Wp,OPTION
+
+*Assembler Option*
+     *Note Passing Options to the Assembler: Assembler Options.
+          -Wa,OPTION
+
+*Linker Options*
+     *Note Options for Linking: Link Options.
+          OBJECT-FILE-NAME  -lLIBRARY
+          -nostartfiles  -nodefaultlibs  -nostdlib
+          -s  -static  -shared  -symbolic
+          -Wl,OPTION  -Xlinker OPTION
+          -u SYMBOL
+
+*Directory Options*
+     *Note Options for Directory Search: Directory Options.
+          -BPREFIX  -IDIR  -I-  -LDIR  -specs=FILE
+
+*Target Options*
+     *Note Target Options::.
+          -b MACHINE  -V VERSION
+
+*Machine Dependent Options*
+     *Note Hardware Models and Configurations: Submodel Options.
+          *M680x0 Options*
+          -m68000  -m68020  -m68020-40  -m68020-60  -m68030  -m68040
+          -m68060  -mcpu32 -m5200  -m68881  -mbitfield  -mc68000  -mc68020
+          -mfpa -mnobitfield  -mrtd  -mshort  -msoft-float
+          -malign-int
+          
+          *VAX Options*
+          -mg  -mgnu  -munix
+          
+          *SPARC Options*
+          -mcpu=CPU TYPE
+          -mtune=CPU TYPE
+          -mcmodel=CODE MODEL
+          -malign-jumps=NUM  -malign-loops=NUM
+          -malign-functions=NUM
+          -m32  -m64
+          -mapp-regs  -mbroken-saverestore  -mcypress  -mepilogue
+          -mflat  -mfpu  -mhard-float  -mhard-quad-float
+          -mimpure-text  -mlive-g0  -mno-app-regs  -mno-epilogue
+          -mno-flat  -mno-fpu  -mno-impure-text
+          -mno-stack-bias  -mno-unaligned-doubles
+          -msoft-float  -msoft-quad-float  -msparclite  -mstack-bias
+          -msupersparc  -munaligned-doubles  -mv8
+          
+          *Convex Options*
+          -mc1  -mc2  -mc32  -mc34  -mc38
+          -margcount  -mnoargcount
+          -mlong32  -mlong64
+          -mvolatile-cache  -mvolatile-nocache
+          
+          *AMD29K Options*
+          -m29000  -m29050  -mbw  -mnbw  -mdw  -mndw
+          -mlarge  -mnormal  -msmall
+          -mkernel-registers  -mno-reuse-arg-regs
+          -mno-stack-check  -mno-storem-bug
+          -mreuse-arg-regs  -msoft-float  -mstack-check
+          -mstorem-bug  -muser-registers
+          
+          *ARM Options*
+          -mapcs-frame -mno-apcs-frame
+          -mapcs-26 -mapcs-32
+          -mapcs-stack-check -mno-apcs-stack-check
+          -mapcs-float -mno-apcs-float
+          -mapcs-reentrant -mno-apcs-reentrant
+          -msched-prolog -mno-sched-prolog
+          -mlittle-endian -mbig-endian -mwords-little-endian
+          -mshort-load-bytes -mno-short-load-bytes -mshort-load-words -mno-short-load-words
+          -msoft-float -mhard-float -mfpe
+          -mthumb-interwork -mno-thumb-interwork
+          -mcpu= -march= -mfpe=
+          -mstructure-size-boundary=
+          -mbsd -mxopen -mno-symrename
+          -mabort-on-noreturn
+          -mno-sched-prolog
+          
+          *Thumb Options*
+          -mtpcs-frame -mno-tpcs-frame
+          -mtpcs-leaf-frame -mno-tpcs-leaf-frame
+          -mlittle-endian  -mbig-endian
+          -mthumb-interwork -mno-thumb-interwork
+          -mstructure-size-boundary=
+          
+          *MN10200 Options*
+          -mrelax
+          
+          *MN10300 Options*
+          -mmult-bug
+          -mno-mult-bug
+          -mrelax
+          
+          *M32R/D Options*
+          -mcode-model=MODEL TYPE  -msdata=SDATA TYPE
+          -G NUM
+          
+          *M88K Options*
+          -m88000  -m88100  -m88110  -mbig-pic
+          -mcheck-zero-division  -mhandle-large-shift
+          -midentify-revision  -mno-check-zero-division
+          -mno-ocs-debug-info  -mno-ocs-frame-position
+          -mno-optimize-arg-area  -mno-serialize-volatile
+          -mno-underscores  -mocs-debug-info
+          -mocs-frame-position  -moptimize-arg-area
+          -mserialize-volatile  -mshort-data-NUM  -msvr3
+          -msvr4  -mtrap-large-shift  -muse-div-instruction
+          -mversion-03.00  -mwarn-passed-structs
+          
+          *RS/6000 and PowerPC Options*
+          -mcpu=CPU TYPE
+          -mtune=CPU TYPE
+          -mpower  -mno-power  -mpower2  -mno-power2
+          -mpowerpc  -mno-powerpc
+          -mpowerpc-gpopt  -mno-powerpc-gpopt
+          -mpowerpc-gfxopt  -mno-powerpc-gfxopt
+          -mnew-mnemonics  -mno-new-mnemonics
+          -mfull-toc   -mminimal-toc  -mno-fop-in-toc  -mno-sum-in-toc
+          -maix64  -maix32  -mxl-call  -mno-xl-call  -mthreads  -mpe
+          -msoft-float  -mhard-float  -mmultiple  -mno-multiple
+          -mstring  -mno-string  -mupdate  -mno-update
+          -mfused-madd  -mno-fused-madd  -mbit-align  -mno-bit-align
+          -mstrict-align  -mno-strict-align  -mrelocatable
+          -mno-relocatable  -mrelocatable-lib  -mno-relocatable-lib
+          -mtoc  -mno-toc -mlittle  -mlittle-endian  -mbig  -mbig-endian
+          -mcall-aix  -mcall-sysv  -mprototype  -mno-prototype
+          -msim  -mmvme  -mads  -myellowknife  -memb -msdata
+          -msdata=OPT  -G NUM
+          
+          *RT Options*
+          -mcall-lib-mul  -mfp-arg-in-fpregs  -mfp-arg-in-gregs
+          -mfull-fp-blocks  -mhc-struct-return  -min-line-mul
+          -mminimum-fp-blocks  -mnohc-struct-return
+          
+          *MIPS Options*
+          -mabicalls  -mcpu=CPU TYPE  -membedded-data
+          -membedded-pic  -mfp32  -mfp64  -mgas  -mgp32  -mgp64
+          -mgpopt  -mhalf-pic  -mhard-float  -mint64  -mips1
+          -mips2  -mips3 -mips4 -mlong64  -mlong32 -mlong-calls  -mmemcpy
+          -mmips-as  -mmips-tfile  -mno-abicalls
+          -mno-embedded-data  -mno-embedded-pic
+          -mno-gpopt  -mno-long-calls
+          -mno-memcpy  -mno-mips-tfile  -mno-rnames  -mno-stats
+          -mrnames  -msoft-float
+          -m4650  -msingle-float  -mmad
+          -mstats  -EL  -EB  -G NUM  -nocpp
+          -mabi=32 -mabi=n32 -mabi=64 -mabi=eabi
+          
+          *i386 Options*
+          -mcpu=CPU TYPE
+          -march=CPU TYPE
+          -mieee-fp  -mno-fancy-math-387
+          -mno-fp-ret-in-387  -msoft-float  -msvr3-shlib
+          -mno-wide-multiply  -mrtd  -malign-double
+          -mreg-alloc=LIST  -mregparm=NUM
+          -malign-jumps=NUM  -malign-loops=NUM
+          -malign-functions=NUM -mpreferred-stack-boundary=NUM
+          
+          *HPPA Options*
+          -march=ARCHITECTURE TYPE
+          -mbig-switch  -mdisable-fpregs  -mdisable-indexing
+          -mfast-indirect-calls -mgas  -mjump-in-delay
+          -mlong-load-store  -mno-big-switch  -mno-disable-fpregs
+          -mno-disable-indexing  -mno-fast-indirect-calls  -mno-gas
+          -mno-jump-in-delay  -mno-long-load-store
+          -mno-portable-runtime  -mno-soft-float  -mno-space
+          -mno-space-regs  -msoft-float  -mpa-risc-1-0
+          -mpa-risc-1-1  -mpa-risc-2-0 -mportable-runtime
+          -mschedule=CPU TYPE  -mspace  -mspace-regs
+          
+          *Intel 960 Options*
+          -mCPU TYPE  -masm-compat  -mclean-linkage
+          -mcode-align  -mcomplex-addr  -mleaf-procedures
+          -mic-compat  -mic2.0-compat  -mic3.0-compat
+          -mintel-asm  -mno-clean-linkage  -mno-code-align
+          -mno-complex-addr  -mno-leaf-procedures
+          -mno-old-align  -mno-strict-align  -mno-tail-call
+          -mnumerics  -mold-align  -msoft-float  -mstrict-align
+          -mtail-call
+          
+          *DEC Alpha Options*
+          -mfp-regs  -mno-fp-regs -mno-soft-float  -msoft-float
+          -malpha-as -mgas
+          -mieee  -mieee-with-inexact  -mieee-conformant
+          -mfp-trap-mode=MODE  -mfp-rounding-mode=MODE
+          -mtrap-precision=MODE  -mbuild-constants
+          -mcpu=CPU TYPE
+          -mbwx -mno-bwx -mcix -mno-cix -mmax -mno-max
+          -mmemory-latency=TIME
+          
+          *Clipper Options*
+          -mc300  -mc400
+          
+          *H8/300 Options*
+          -mrelax  -mh -ms -mint32  -malign-300
+          
+          *SH Options*
+          -m1  -m2  -m3  -m3e  -mb  -ml  -mdalign -mrelax
+          
+          *System V Options*
+          -Qy  -Qn  -YP,PATHS  -Ym,DIR
+          
+          *ARC Options*
+          -EB  -EL
+          -mmangle-cpu  -mcpu=CPU  -mtext=TEXT SECTION
+          -mdata=DATA SECTION  -mrodata=READONLY DATA SECTION
+          
+          *TMS320C3x/C4x Options*
+          -mcpu=CPU -mbig -msmall -mregparm -mmemparm
+          -mfast-fix -mmpyi -mbk -mti -mdp-isr-reload
+          -mrpts=COUNT  -mrptb -mdb -mloop-unsigned
+          -mparallel-insns -mparallel-mpy -mpreserve-float
+          
+          *V850 Options*
+          -mlong-calls -mno-long-calls -mep -mno-ep
+          -mprolog-function -mno-prolog-function -mspace
+          -mtda=N -msda=N -mzda=N
+          -mv850 -mbig-switch
+          
+          *NS32K Options*
+          -m32032 -m32332 -m32532 -m32081 -m32381 -mmult-add -mnomult-add
+          -msoft-float -mrtd -mnortd -mregparam -mnoregparam -msb -mnosb
+          -mbitfield -mnobitfield -mhimem -mnohimem
+
+*Code Generation Options*
+     *Note Options for Code Generation Conventions: Code Gen Options.
+          -fcall-saved-REG  -fcall-used-REG
+          -fexceptions -ffixed-REG  -finhibit-size-directive
+          -fcheck-memory-usage  -fprefix-function-name
+          -fno-common  -fno-ident  -fno-gnu-linker
+          -fpcc-struct-return  -fpic  -fPIC
+          -freg-struct-return  -fshared-data  -fshort-enums
+          -fshort-double  -fvolatile  -fvolatile-global -fvolatile-static
+          -fverbose-asm -fpack-struct  -fstack-check
+          -fargument-alias  -fargument-noalias
+          -fargument-noalias-global
+          -fleading-underscore
+
+* Menu:
+
+* Overall Options::     Controlling the kind of output:
+                        an executable, object files, assembler files,
+                        or preprocessed source.
+* C Dialect Options::   Controlling the variant of C language compiled.
+* C++ Dialect Options:: Variations on C++.
+* Warning Options::     How picky should the compiler be?
+* Debugging Options::   Symbol tables, measurements, and debugging dumps.
+* Optimize Options::    How much optimization?
+* Preprocessor Options:: Controlling header files and macro definitions.
+                         Also, getting dependency information for Make.
+* Assembler Options::   Passing options to the assembler.
+* Link Options::        Specifying libraries and so on.
+* Directory Options::   Where to find header files and libraries.
+                        Where to find the compiler executable files.
+* Target Options::      Running a cross-compiler, or an old version of GCC.
+
+
+File: gcc.info,  Node: Overall Options,  Next: Invoking G++,  Prev: Option Summary,  Up: Invoking GCC
+
+Options Controlling the Kind of Output
+======================================
+
+   Compilation can involve up to four stages: preprocessing, compilation
+proper, assembly and linking, always in that order.  The first three
+stages apply to an individual source file, and end by producing an
+object file; linking combines all the object files (those newly
+compiled, and those specified as input) into an executable file.
+
+   For any given input file, the file name suffix determines what kind
+of compilation is done:
+
+`FILE.c'
+     C source code which must be preprocessed.
+
+`FILE.i'
+     C source code which should not be preprocessed.
+
+`FILE.ii'
+     C++ source code which should not be preprocessed.
+
+`FILE.m'
+     Objective-C source code.  Note that you must link with the library
+     `libobjc.a' to make an Objective-C program work.
+
+`FILE.h'
+     C header file (not to be compiled or linked).
+
+`FILE.cc'
+`FILE.cxx'
+`FILE.cpp'
+`FILE.C'
+     C++ source code which must be preprocessed.  Note that in `.cxx',
+     the last two letters must both be literally `x'.  Likewise, `.C'
+     refers to a literal capital C.
+
+`FILE.s'
+     Assembler code.
+
+`FILE.S'
+     Assembler code which must be preprocessed.
+
+`OTHER'
+     An object file to be fed straight into linking.  Any file name
+     with no recognized suffix is treated this way.
+
+   You can specify the input language explicitly with the `-x' option:
+
+`-x LANGUAGE'
+     Specify explicitly the LANGUAGE for the following input files
+     (rather than letting the compiler choose a default based on the
+     file name suffix).  This option applies to all following input
+     files until the next `-x' option.  Possible values for LANGUAGE
+     are:
+          c  objective-c  c++
+          c-header  cpp-output  c++-cpp-output
+          assembler  assembler-with-cpp
+
+`-x none'
+     Turn off any specification of a language, so that subsequent files
+     are handled according to their file name suffixes (as they are if
+     `-x' has not been used at all).
+
+   If you only want some of the stages of compilation, you can use `-x'
+(or filename suffixes) to tell `gcc' where to start, and one of the
+options `-c', `-S', or `-E' to say where `gcc' is to stop.  Note that
+some combinations (for example, `-x cpp-output -E' instruct `gcc' to do
+nothing at all.
+
+`-c'
+     Compile or assemble the source files, but do not link.  The linking
+     stage simply is not done.  The ultimate output is in the form of an
+     object file for each source file.
+
+     By default, the object file name for a source file is made by
+     replacing the suffix `.c', `.i', `.s', etc., with `.o'.
+
+     Unrecognized input files, not requiring compilation or assembly,
+     are ignored.
+
+`-S'
+     Stop after the stage of compilation proper; do not assemble.  The
+     output is in the form of an assembler code file for each
+     non-assembler input file specified.
+
+     By default, the assembler file name for a source file is made by
+     replacing the suffix `.c', `.i', etc., with `.s'.
+
+     Input files that don't require compilation are ignored.
+
+`-E'
+     Stop after the preprocessing stage; do not run the compiler
+     proper.  The output is in the form of preprocessed source code,
+     which is sent to the standard output.
+
+     Input files which don't require preprocessing are ignored.
+
+`-o FILE'
+     Place output in file FILE.  This applies regardless to whatever
+     sort of output is being produced, whether it be an executable file,
+     an object file, an assembler file or preprocessed C code.
+
+     Since only one output file can be specified, it does not make
+     sense to use `-o' when compiling more than one input file, unless
+     you are producing an executable file as output.
+
+     If `-o' is not specified, the default is to put an executable file
+     in `a.out', the object file for `SOURCE.SUFFIX' in `SOURCE.o', its
+     assembler file in `SOURCE.s', and all preprocessed C source on
+     standard output.
+
+`-v'
+     Print (on standard error output) the commands executed to run the
+     stages of compilation.  Also print the version number of the
+     compiler driver program and of the preprocessor and the compiler
+     proper.
+
+`-pipe'
+     Use pipes rather than temporary files for communication between the
+     various stages of compilation.  This fails to work on some systems
+     where the assembler is unable to read from a pipe; but the GNU
+     assembler has no trouble.
+
+`--help'
+     Print (on the standard output) a description of the command line
+     options understood by `gcc'.  If the `-v' option is also specified
+     then `--help' will also be passed on to the various processes
+     invoked by `gcc', so that they can display the command line options
+     they accept.  If the `-W' option is also specified then command
+     line options which have no documentation associated with them will
+     also be displayed.
+
+
+File: gcc.info,  Node: Invoking G++,  Next: C Dialect Options,  Prev: Overall Options,  Up: Invoking GCC
+
+Compiling C++ Programs
+======================
+
+   C++ source files conventionally use one of the suffixes `.C', `.cc',
+`.cpp', `.c++', `.cp', or `.cxx'; preprocessed C++ files use the suffix
+`.ii'.  GCC recognizes files with these names and compiles them as C++
+programs even if you call the compiler the same way as for compiling C
+programs (usually with the name `gcc').
+
+   However, C++ programs often require class libraries as well as a
+compiler that understands the C++ language--and under some
+circumstances, you might want to compile programs from standard input,
+or otherwise without a suffix that flags them as C++ programs.  `g++'
+is a program that calls GCC with the default language set to C++, and
+automatically specifies linking against the C++ library.  On many
+systems, the script `g++' is also installed with the name `c++'.
+
+   When you compile C++ programs, you may specify many of the same
+command-line options that you use for compiling programs in any
+language; or command-line options meaningful for C and related
+languages; or options that are meaningful only for C++ programs.  *Note
+Options Controlling C Dialect: C Dialect Options, for explanations of
+options for languages related to C.  *Note Options Controlling C++
+Dialect: C++ Dialect Options, for explanations of options that are
+meaningful only for C++ programs.
+
+
+File: gcc.info,  Node: C Dialect Options,  Next: C++ Dialect Options,  Prev: Invoking G++,  Up: Invoking GCC
+
+Options Controlling C Dialect
+=============================
+
+   The following options control the dialect of C (or languages derived
+from C, such as C++ and Objective C) that the compiler accepts:
+
+`-ansi'
+     In C mode, support all ANSI standard C programs.  In C++ mode,
+     remove GNU extensions that conflict with ANSI C++.
+
+     This turns off certain features of GCC that are incompatible with
+     ANSI C (when compiling C code), or of ANSI standard C++ (when
+     compiling C++ code), such as the `asm' and `typeof' keywords, and
+     predefined macros such as `unix' and `vax' that identify the type
+     of system you are using.  It also enables the undesirable and
+     rarely used ANSI trigraph feature.  For the C compiler, it
+     disables recognition of C++ style `//' comments as well as the
+     `inline' keyword.  For the C++ compiler, `-foperator-names' is
+     enabled as well.
+
+     The alternate keywords `__asm__', `__extension__', `__inline__'
+     and `__typeof__' continue to work despite `-ansi'.  You would not
+     want to use them in an ANSI C program, of course, but it is useful
+     to put them in header files that might be included in compilations
+     done with `-ansi'.  Alternate predefined macros such as `__unix__'
+     and `__vax__' are also available, with or without `-ansi'.
+
+     The `-ansi' option does not cause non-ANSI programs to be rejected
+     gratuitously.  For that, `-pedantic' is required in addition to
+     `-ansi'.  *Note Warning Options::.
+
+     The macro `__STRICT_ANSI__' is predefined when the `-ansi' option
+     is used.  Some header files may notice this macro and refrain from
+     declaring certain functions or defining certain macros that the
+     ANSI standard doesn't call for; this is to avoid interfering with
+     any programs that might use these names for other things.
+
+     The functions `alloca', `abort', `exit', and `_exit' are not
+     builtin functions when `-ansi' is used.
+
+`-flang-isoc9x'
+     Enable support for features found in the C9X standard.  In
+     particular, enable support for the C9X `restrict' keyword.
+
+     Even when this option is not specified, you can still use some C9X
+     features in so far as they do not conflict with previous C
+     standards.  For example, you may use `__restrict__' even when
+     -flang-isoc9x is not specified.
+
+`-fno-asm'
+     Do not recognize `asm', `inline' or `typeof' as a keyword, so that
+     code can use these words as identifiers.  You can use the keywords
+     `__asm__', `__inline__' and `__typeof__' instead.  `-ansi' implies
+     `-fno-asm'.
+
+     In C++, this switch only affects the `typeof' keyword, since `asm'
+     and `inline' are standard keywords.  You may want to use the
+     `-fno-gnu-keywords' flag instead, as it also disables the other,
+     C++-specific, extension keywords such as `headof'.
+
+`-fno-builtin'
+     Don't recognize builtin functions that do not begin with
+     `__builtin_' as prefix.  Currently, the functions affected include
+     `abort', `abs', `alloca', `cos', `exit', `fabs', `ffs', `labs',
+     `memcmp', `memcpy', `sin', `sqrt', `strcmp', `strcpy', and
+     `strlen'.
+
+     GCC normally generates special code to handle certain builtin
+     functions more efficiently; for instance, calls to `alloca' may
+     become single instructions that adjust the stack directly, and
+     calls to `memcpy' may become inline copy loops.  The resulting
+     code is often both smaller and faster, but since the function
+     calls no longer appear as such, you cannot set a breakpoint on
+     those calls, nor can you change the behavior of the functions by
+     linking with a different library.
+
+     The `-ansi' option prevents `alloca' and `ffs' from being builtin
+     functions, since these functions do not have an ANSI standard
+     meaning.
+
+`-fhosted'
+     Assert that compilation takes place in a hosted environment.  This
+     implies `-fbuiltin'.  A hosted environment is one in which the
+     entire standard library is available, and in which `main' has a
+     return type of `int'.  Examples are nearly everything except a
+     kernel.  This is equivalent to `-fno-freestanding'.
+
+`-ffreestanding'
+     Assert that compilation takes place in a freestanding environment.
+     This implies `-fno-builtin'.  A freestanding environment is one
+     in which the standard library may not exist, and program startup
+     may not necessarily be at `main'.  The most obvious example is an
+     OS kernel.  This is equivalent to `-fno-hosted'.
+
+`-trigraphs'
+     Support ANSI C trigraphs.  You don't want to know about this
+     brain-damage.  The `-ansi' option implies `-trigraphs'.
+
+`-traditional'
+     Attempt to support some aspects of traditional C compilers.
+     Specifically:
+
+        * All `extern' declarations take effect globally even if they
+          are written inside of a function definition.  This includes
+          implicit declarations of functions.
+
+        * The newer keywords `typeof', `inline', `signed', `const' and
+          `volatile' are not recognized.  (You can still use the
+          alternative keywords such as `__typeof__', `__inline__', and
+          so on.)
+
+        * Comparisons between pointers and integers are always allowed.
+
+        * Integer types `unsigned short' and `unsigned char' promote to
+          `unsigned int'.
+
+        * Out-of-range floating point literals are not an error.
+
+        * Certain constructs which ANSI regards as a single invalid
+          preprocessing number, such as `0xe-0xd', are treated as
+          expressions instead.
+
+        * String "constants" are not necessarily constant; they are
+          stored in writable space, and identical looking constants are
+          allocated separately.  (This is the same as the effect of
+          `-fwritable-strings'.)
+
+        * All automatic variables not declared `register' are preserved
+          by `longjmp'.  Ordinarily, GNU C follows ANSI C: automatic
+          variables not declared `volatile' may be clobbered.
+
+        * The character escape sequences `\x' and `\a' evaluate as the
+          literal characters `x' and `a' respectively.  Without
+          `-traditional', `\x' is a prefix for the hexadecimal
+          representation of a character, and `\a' produces a bell.
+
+     You may wish to use `-fno-builtin' as well as `-traditional' if
+     your program uses names that are normally GNU C builtin functions
+     for other purposes of its own.
+
+     You cannot use `-traditional' if you include any header files that
+     rely on ANSI C features.  Some vendors are starting to ship
+     systems with ANSI C header files and you cannot use `-traditional'
+     on such systems to compile files that include any system headers.
+
+     The `-traditional' option also enables `-traditional-cpp', which
+     is described next.
+
+`-traditional-cpp'
+     Attempt to support some aspects of traditional C preprocessors.
+     Specifically:
+
+        * Comments convert to nothing at all, rather than to a space.
+          This allows traditional token concatenation.
+
+        * In a preprocessing directive, the `#' symbol must appear as
+          the first character of a line.
+
+        * Macro arguments are recognized within string constants in a
+          macro definition (and their values are stringified, though
+          without additional quote marks, when they appear in such a
+          context).  The preprocessor always considers a string
+          constant to end at a newline.
+
+        * The predefined macro `__STDC__' is not defined when you use
+          `-traditional', but `__GNUC__' is (since the GNU extensions
+          which `__GNUC__' indicates are not affected by
+          `-traditional').  If you need to write header files that work
+          differently depending on whether `-traditional' is in use, by
+          testing both of these predefined macros you can distinguish
+          four situations: GNU C, traditional GNU C, other ANSI C
+          compilers, and other old C compilers.  The predefined macro
+          `__STDC_VERSION__' is also not defined when you use
+          `-traditional'.  *Note Standard Predefined Macros:
+          (cpp.info)Standard Predefined, for more discussion of these
+          and other predefined macros.
+
+        * The preprocessor considers a string constant to end at a
+          newline (unless the newline is escaped with `\').  (Without
+          `-traditional', string constants can contain the newline
+          character as typed.)
+
+`-fcond-mismatch'
+     Allow conditional expressions with mismatched types in the second
+     and third arguments.  The value of such an expression is void.
+
+`-funsigned-char'
+     Let the type `char' be unsigned, like `unsigned char'.
+
+     Each kind of machine has a default for what `char' should be.  It
+     is either like `unsigned char' by default or like `signed char' by
+     default.
+
+     Ideally, a portable program should always use `signed char' or
+     `unsigned char' when it depends on the signedness of an object.
+     But many programs have been written to use plain `char' and expect
+     it to be signed, or expect it to be unsigned, depending on the
+     machines they were written for.  This option, and its inverse, let
+     you make such a program work with the opposite default.
+
+     The type `char' is always a distinct type from each of `signed
+     char' or `unsigned char', even though its behavior is always just
+     like one of those two.
+
+`-fsigned-char'
+     Let the type `char' be signed, like `signed char'.
+
+     Note that this is equivalent to `-fno-unsigned-char', which is the
+     negative form of `-funsigned-char'.  Likewise, the option
+     `-fno-signed-char' is equivalent to `-funsigned-char'.
+
+     You may wish to use `-fno-builtin' as well as `-traditional' if
+     your program uses names that are normally GNU C builtin functions
+     for other purposes of its own.
+
+     You cannot use `-traditional' if you include any header files that
+     rely on ANSI C features.  Some vendors are starting to ship
+     systems with ANSI C header files and you cannot use `-traditional'
+     on such systems to compile files that include any system headers.
+
+`-fsigned-bitfields'
+`-funsigned-bitfields'
+`-fno-signed-bitfields'
+`-fno-unsigned-bitfields'
+     These options control whether a bitfield is signed or unsigned,
+     when the declaration does not use either `signed' or `unsigned'.
+     By default, such a bitfield is signed, because this is consistent:
+     the basic integer types such as `int' are signed types.
+
+     However, when `-traditional' is used, bitfields are all unsigned
+     no matter what.
+
+`-fwritable-strings'
+     Store string constants in the writable data segment and don't
+     uniquize them.  This is for compatibility with old programs which
+     assume they can write into string constants.  The option
+     `-traditional' also has this effect.
+
+     Writing into string constants is a very bad idea; "constants"
+     should be constant.
+
+`-fallow-single-precision'
+     Do not promote single precision math operations to double
+     precision, even when compiling with `-traditional'.
+
+     Traditional K&R C promotes all floating point operations to double
+     precision, regardless of the sizes of the operands.   On the
+     architecture for which you are compiling, single precision may be
+     faster than double precision.   If you must use `-traditional',
+     but want to use single precision operations when the operands are
+     single precision, use this option.   This option has no effect
+     when compiling with ANSI or GNU C conventions (the default).
+

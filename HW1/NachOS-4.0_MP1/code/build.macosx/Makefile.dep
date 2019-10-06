@@ -1,0 +1,18 @@
+##################################################################
+#  Machine Dependencies - this file is included automatically
+#     into the main Makefile
+#
+##################################################################
+
+HOSTCFLAGS = -DHOST_IS_BIG_ENDIAN -DPowerPC -DBSD -DAIX -DApplePowerPC
+CPP_AS_FLAGS = -D_ASM
+CPP = cpp
+
+#-----------------------------------------------------------------
+# Do not put anything below this point - it will be destroyed by
+# "make depend"
+#
+# DO NOT DELETE THIS LINE -- make depend uses it
+# DEPENDENCIES MUST END AT END OF FILE
+# IF YOU PUT STUFF HERE IT WILL GO AWAY
+# see make depend above

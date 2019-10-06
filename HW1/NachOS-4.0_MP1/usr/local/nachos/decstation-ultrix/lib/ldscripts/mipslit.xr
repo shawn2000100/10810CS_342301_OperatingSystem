@@ -1,0 +1,40 @@
+OUTPUT_FORMAT("ecoff-littlemips", "ecoff-bigmips",
+	      "ecoff-littlemips")
+ SEARCH_DIR(/usr/local/nachos/decstation-ultrix/lib);
+ENTRY(__start)
+SECTIONS
+{
+  .text : {
+    ;
+    *(.init)
+    ;
+    *(.text)
+    *(.rel.sdata)
+    *(.fini)
+    ;
+    ;
+  }
+  .rdata : {
+    *(.rdata)
+  }
+  .data : {
+    *(.data)
+  }
+  .lit8 : {
+    *(.lit8)
+  }
+  .lit4 : {
+    *(.lit4)
+  }
+  .sdata : {
+    *(.sdata)
+  }
+  .sbss : {
+    *(.sbss)
+    *(.scommon)
+  }
+  .bss : {
+    *(.bss)
+    *(COMMON)
+  }
+}
