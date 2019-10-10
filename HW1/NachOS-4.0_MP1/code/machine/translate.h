@@ -10,10 +10,8 @@
 //	<virtual page #, physical page #>.
 //
 // DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: Hint: 這應該是之後做VMM會用到的，目前不用看
 
 #ifndef TLB_H
 #define TLB_H

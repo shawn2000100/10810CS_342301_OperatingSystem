@@ -13,10 +13,10 @@
 //	for errors, etc.
 //
 //  DO NOT CHANGE EXCEPT AS NOTED BELOW -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: mipssim與machine這2份檔案就是在模擬真實CPU!
+// 1910010[J]: mipssim是在模擬mips的ISA
+// 1910010[J]: machine是在模擬真正的硬體
 
 #ifndef MACHINE_H
 #define MACHINE_H
@@ -73,7 +73,7 @@ enum ExceptionType { NoException,           // Everything ok!
 #define LoadValueReg 	38	// The value to be loaded by a delayed load.
 #define BadVAddrReg	39	// The failing virtual address on an exception
 
-#define NumTotalRegs 	40
+#define NumTotalRegs 	40 // 1910010[J]: NachOS似乎有40種Register
 
 // The following class defines the simulated host workstation hardware, as 
 // seen by user programs -- the CPU registers, main memory, etc.

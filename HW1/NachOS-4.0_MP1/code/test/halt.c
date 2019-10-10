@@ -11,10 +11,13 @@
  */
 
 #include "syscall.h"
-
+// include <stdio.h> // 1910010[J]: 無法include <stdio.h> ...
+// 1910010[J]: Halt()在usrProg/syscall.h裡呼叫，可能就是return 0 的意思，詳細定義的位置可能是在
 int
 main()
 {
+    PrintInt(666666); 
     Halt();
     /* not reached */
+    PrintInt(777777);
 }

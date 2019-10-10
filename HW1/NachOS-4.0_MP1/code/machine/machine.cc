@@ -2,10 +2,10 @@
 //	Routines for simulating the execution of user programs.
 //
 //  DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: mipssim與machine這2份檔案就是在模擬真實CPU!
+// 1910010[J]: mipssim是在模擬mips的ISA
+// 1910010[J]: machine是在模擬真正的硬體
 
 #include "copyright.h"
 #include "machine.h"

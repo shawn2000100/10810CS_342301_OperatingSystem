@@ -1,5 +1,6 @@
 #include "syscall.h"
 
+// 1910010[J]: 之後demo要跑的程式，可能要實作出syscall裡的Write, Close功能。下面才能編譯成功
 int main(void)
 {
 	char test[] = "abcdefghijklmnopqrstuvwxyz";

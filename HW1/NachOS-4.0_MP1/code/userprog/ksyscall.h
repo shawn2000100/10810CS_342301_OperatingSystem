@@ -3,10 +3,10 @@
  * userprog/ksyscall.h
  *
  * Kernel interface for systemcalls 
- *
- * by Marcus Voelp  (c) Universitaet Karlsruhe
- *
  **************************************************************/
+
+// 1910010[J]: Hint: 這個檔案需要被修改!
+// 1910010[J]: Hint: 目前有一點不太懂 ksyscall與syscall的差別
 
 #ifndef __USERPROG_KSYSCALL_H__ 
 #define __USERPROG_KSYSCALL_H__ 

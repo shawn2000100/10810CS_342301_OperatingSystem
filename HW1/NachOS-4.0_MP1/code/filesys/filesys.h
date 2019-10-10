@@ -25,10 +25,8 @@
 //	disk sectors.  Both the root directory and the bitmap are themselves
 //	stored as files in the Nachos file system -- this causes an interesting
 //	bootstrap problem when the simulated disk is initialized. 
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: Hint: 這個檔案需要被修改!
 
 #ifndef FS_H
 #define FS_H

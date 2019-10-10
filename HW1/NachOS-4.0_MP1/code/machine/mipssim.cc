@@ -5,18 +5,12 @@
 //   DEC RISC systems.
 //
 //   DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
-// Simulation fixes done by Peter E Reissner, class of Winter 1994/95 (York)
-// I've not been able to test this extensively.
-// Ported to newer version of Nachos at Waterloo by Scott Graham (Mar 99).
-
+// 1910010[J]: mipssim與machine這2份檔案就是在模擬真實CPU!
+// 1910010[J]: mipssim是在模擬mips的ISA
+// 1910010[J]: machine是在模擬真正的硬體
 
 #include "copyright.h"
-
 #include "debug.h"
 #include "machine.h"
 #include "mipssim.h"
@@ -67,7 +61,7 @@ Machine::Run()
 	DEBUG(dbgTraCode, "In Machine::Run(), into OneInstruction " << "== Tick " << kernel->stats->totalTicks << " ==");
         OneInstruction(instr);
 	DEBUG(dbgTraCode, "In Machine::Run(), return from OneInstruction  " << "== Tick " << kernel->stats->totalTicks << " ==");
-		
+
 	DEBUG(dbgTraCode, "In Machine::Run(), into OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
 	kernel->interrupt->OneTick();
 	DEBUG(dbgTraCode, "In Machine::Run(), return from OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
@@ -79,10 +73,10 @@ Machine::Run()
 
 //----------------------------------------------------------------------
 // TypeToReg
-// 	Retrieve the register # referred to in an instruction. 
+// 	Retrieve the register # referred to in an instruction.
 //----------------------------------------------------------------------
 
-static int 
+static int
 TypeToReg(RegType reg, Instruction *instr)
 {
     switch (reg) {
@@ -103,13 +97,13 @@ TypeToReg(RegType reg, Instruction *instr)
 // Machine::OneInstruction
 // 	Execute one instruction from a user-level program
 //
-// 	If there is any kind of exception or interrupt, we invoke the 
+// 	If there is any kind of exception or interrupt, we invoke the
 //	exception handler, and when it returns, we return to Run(), which
 //	will re-invoke us in a loop.  This allows us to
 //	re-start the instruction execution from the beginning, in
 //	case any of our state has changed.  On a syscall,
 // 	the OS software must increment the PC so execution begins
-// 	at the instruction immediately after the syscall. 
+// 	at the instruction immediately after the syscall.
 //
 //	This routine is re-entrant, in that it can be called multiple
 //	times concurrently -- one for each thread executing user code.
@@ -121,7 +115,6 @@ TypeToReg(RegType reg, Instruction *instr)
 //	by controlling the contents of memory, the translation table,
 //	and the register set.
 //----------------------------------------------------------------------
-
 void
 Machine::OneInstruction(Instruction *instr)
 {
@@ -130,11 +123,11 @@ Machine::OneInstruction(Instruction *instr)
 #endif
 
     int raw;
-    int nextLoadReg = 0; 	
+    int nextLoadReg = 0;
     int nextLoadValue = 0; 	// record delayed load operation, to apply
 				// in the future
 
-    // Fetch instruction 
+    // Fetch instruction
     if (!ReadMem(registers[PCReg], 4, &raw))
 	return;			// exception occurred
     instr->value = raw;
@@ -150,7 +143,7 @@ Machine::OneInstruction(Instruction *instr)
 	     TypeToReg(str->args[1], instr), TypeToReg(str->args[2], instr));
         cout << "\t" << buf << "\n";
     }
-    
+
     // Compute next pc, but don't install in case there's an error or branch.
     int pcAfter = registers[NextPCReg] + 4;
     int sum, diff, tmp, value;
@@ -158,7 +151,7 @@ Machine::OneInstruction(Instruction *instr)
 
     // Execute the instruction (cf. Kane's book)
     switch (instr->opCode) {
-	
+
       case OP_ADD:
 	sum = registers[instr->rs] + registers[instr->rt];
 	if (!((registers[instr->rs] ^ registers[instr->rt]) & SIGN_BIT) &&
@@ -168,7 +161,7 @@ Machine::OneInstruction(Instruction *instr)
 	}
 	registers[instr->rd] = sum;
 	break;
-	
+
       case OP_ADDI:
 	sum = registers[instr->rs] + instr->extra;
 	if (!((registers[instr->rs] ^ instr->extra) & SIGN_BIT) &&
@@ -178,57 +171,57 @@ Machine::OneInstruction(Instruction *instr)
 	}
 	registers[instr->rt] = sum;
 	break;
-	
+
       case OP_ADDIU:
 	registers[instr->rt] = registers[instr->rs] + instr->extra;
 	break;
-	
+
       case OP_ADDU:
 	registers[instr->rd] = registers[instr->rs] + registers[instr->rt];
 	break;
-	
+
       case OP_AND:
 	registers[instr->rd] = registers[instr->rs] & registers[instr->rt];
 	break;
-	
+
       case OP_ANDI:
 	registers[instr->rt] = registers[instr->rs] & (instr->extra & 0xffff);
 	break;
-	
+
       case OP_BEQ:
 	if (registers[instr->rs] == registers[instr->rt])
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_BGEZAL:
 	registers[R31] = registers[NextPCReg] + 4;
       case OP_BGEZ:
 	if (!(registers[instr->rs] & SIGN_BIT))
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_BGTZ:
 	if (registers[instr->rs] > 0)
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_BLEZ:
 	if (registers[instr->rs] <= 0)
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_BLTZAL:
 	registers[R31] = registers[NextPCReg] + 4;
       case OP_BLTZ:
 	if (registers[instr->rs] & SIGN_BIT)
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_BNE:
 	if (registers[instr->rs] != registers[instr->rt])
 	    pcAfter = registers[NextPCReg] + IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_DIV:
 	if (registers[instr->rt] == 0) {
 	    registers[LoReg] = 0;
@@ -238,8 +231,8 @@ Machine::OneInstruction(Instruction *instr)
 	    registers[HiReg] = registers[instr->rs] % registers[instr->rt];
 	}
 	break;
-	
-      case OP_DIVU:	  
+
+      case OP_DIVU:
 	  rs = (unsigned int) registers[instr->rs];
 	  rt = (unsigned int) registers[instr->rt];
 	  if (rt == 0) {
@@ -252,19 +245,19 @@ Machine::OneInstruction(Instruction *instr)
 	      registers[HiReg] = (int) tmp;
 	  }
 	  break;
-	
+
       case OP_JAL:
 	registers[R31] = registers[NextPCReg] + 4;
       case OP_J:
 	pcAfter = (pcAfter & 0xf0000000) | IndexToAddr(instr->extra);
 	break;
-	
+
       case OP_JALR:
 	registers[instr->rd] = registers[NextPCReg] + 4;
       case OP_JR:
 	pcAfter = registers[instr->rs];
 	break;
-	
+
       case OP_LB:
       case OP_LBU:
 	tmp = registers[instr->rs] + instr->extra;
@@ -278,9 +271,9 @@ Machine::OneInstruction(Instruction *instr)
 	nextLoadReg = instr->rt;
 	nextLoadValue = value;
 	break;
-	
+
       case OP_LH:
-      case OP_LHU:	  
+      case OP_LHU:
 	tmp = registers[instr->rs] + instr->extra;
 	if (tmp & 0x1) {
 	    RaiseException(AddressErrorException, tmp);
@@ -296,12 +289,12 @@ Machine::OneInstruction(Instruction *instr)
 	nextLoadReg = instr->rt;
 	nextLoadValue = value;
 	break;
-      	
+
       case OP_LUI:
 	DEBUG(dbgMach, "Executing: LUI r" << instr->rt << ", " << instr->extra);
 	registers[instr->rt] = instr->extra << 16;
 	break;
-	
+
       case OP_LW:
 	tmp = registers[instr->rs] + instr->extra;
 	if (tmp & 0x3) {
@@ -313,8 +306,8 @@ Machine::OneInstruction(Instruction *instr)
 	nextLoadReg = instr->rt;
 	nextLoadValue = value;
 	break;
-    	
-      case OP_LWL:	  
+
+      case OP_LWL:
 	tmp = registers[instr->rs] + instr->extra;
 
 #ifdef SIM_FIX
@@ -331,10 +324,10 @@ Machine::OneInstruction(Instruction *instr)
         if (!ReadMem(tmp-byte, 4, &value))
             return;
 #else
-	// ReadMem assumes all 4 byte requests are aligned on an even 
+	// ReadMem assumes all 4 byte requests are aligned on an even
 	// word boundary.  Also, the little endian/big endian swap code would
         // fail (I think) if the other cases are ever exercised.
-	ASSERT((tmp & 0x3) == 0);  
+	ASSERT((tmp & 0x3) == 0);
 
 	if (!ReadMem(tmp, 4, &value))
 	    return;
@@ -345,7 +338,7 @@ Machine::OneInstruction(Instruction *instr)
 	else
 	    nextLoadValue = registers[instr->rt];
 #ifdef SIM_FIX
-	switch (3 - byte) 
+	switch (3 - byte)
 #else
 	switch (tmp & 0x3)
 #endif
@@ -365,7 +358,7 @@ Machine::OneInstruction(Instruction *instr)
 	}
 	nextLoadReg = instr->rt;
 	break;
-      	
+
       case OP_LWR:
 	tmp = registers[instr->rs] + instr->extra;
 
@@ -373,7 +366,7 @@ Machine::OneInstruction(Instruction *instr)
         // The only difference between this code and the BIG ENDIAN code
         // is that the ReadMem call is guaranteed an aligned access as it
         // should be (Kane's book hides the fact that all memory access
-        // are done using aligned loads - what the instruction asks 
+        // are done using aligned loads - what the instruction asks
         // for is a arbitrary) This is the whole purpose of LWL and LWR etc.
         // Then the switch uses  3 - (tmp & 0x3)  instead of (tmp & 0x3)
 
@@ -383,10 +376,10 @@ Machine::OneInstruction(Instruction *instr)
         if (!ReadMem(tmp-byte, 4, &value))
             return;
 #else
-	// ReadMem assumes all 4 byte requests are aligned on an even 
+	// ReadMem assumes all 4 byte requests are aligned on an even
 	// word boundary.  Also, the little endian/big endian swap code would
         // fail (I think) if the other cases are ever exercised.
-	ASSERT((tmp & 0x3) == 0);  
+	ASSERT((tmp & 0x3) == 0);
 
 	if (!ReadMem(tmp, 4, &value))
 	    return;
@@ -398,7 +391,7 @@ Machine::OneInstruction(Instruction *instr)
 	    nextLoadValue = registers[instr->rt];
 
 #ifdef SIM_FIX
-	switch (3 - byte) 
+	switch (3 - byte)
 #else
 	switch (tmp & 0x3)
 #endif
@@ -421,81 +414,81 @@ Machine::OneInstruction(Instruction *instr)
 	}
 	nextLoadReg = instr->rt;
 	break;
-    	
+
       case OP_MFHI:
 	registers[instr->rd] = registers[HiReg];
 	break;
-	
+
       case OP_MFLO:
 	registers[instr->rd] = registers[LoReg];
 	break;
-	
+
       case OP_MTHI:
 	registers[HiReg] = registers[instr->rs];
 	break;
-	
+
       case OP_MTLO:
 	registers[LoReg] = registers[instr->rs];
 	break;
-	
+
       case OP_MULT:
 	Mult(registers[instr->rs], registers[instr->rt], TRUE,
 	     &registers[HiReg], &registers[LoReg]);
 	break;
-	
+
       case OP_MULTU:
 	Mult(registers[instr->rs], registers[instr->rt], FALSE,
 	     &registers[HiReg], &registers[LoReg]);
 	break;
-	
+
       case OP_NOR:
 	registers[instr->rd] = ~(registers[instr->rs] | registers[instr->rt]);
 	break;
-	
+
       case OP_OR:
 	registers[instr->rd] = registers[instr->rs] | registers[instr->rt];
 	break;
-	
+
       case OP_ORI:
 	registers[instr->rt] = registers[instr->rs] | (instr->extra & 0xffff);
 	break;
-	
+
       case OP_SB:
-	if (!WriteMem((unsigned) 
+	if (!WriteMem((unsigned)
 		(registers[instr->rs] + instr->extra), 1, registers[instr->rt]))
 	    return;
 	break;
-	
+
       case OP_SH:
-	if (!WriteMem((unsigned) 
+	if (!WriteMem((unsigned)
 		(registers[instr->rs] + instr->extra), 2, registers[instr->rt]))
 	    return;
 	break;
-	
+
       case OP_SLL:
 	registers[instr->rd] = registers[instr->rt] << instr->extra;
 	break;
-	
+
       case OP_SLLV:
 	registers[instr->rd] = registers[instr->rt] <<
 	    (registers[instr->rs] & 0x1f);
 	break;
-	
+
       case OP_SLT:
 	if (registers[instr->rs] < registers[instr->rt])
 	    registers[instr->rd] = 1;
 	else
 	    registers[instr->rd] = 0;
 	break;
-	
+
       case OP_SLTI:
 	if (registers[instr->rs] < instr->extra)
 	    registers[instr->rt] = 1;
 	else
 	    registers[instr->rt] = 0;
 	break;
-	
-      case OP_SLTIU:	  
+
+      case OP_SLTIU:
 	rs = registers[instr->rs];
 	imm = instr->extra;
 	if (rs < imm)
@@ -503,8 +496,8 @@ Machine::OneInstruction(Instruction *instr)
 	else
 	    registers[instr->rt] = 0;
 	break;
-      	
-      case OP_SLTU:	  
+
+      case OP_SLTU:
 	rs = registers[instr->rs];
 	rt = registers[instr->rt];
 	if (rs < rt)
@@ -512,29 +505,29 @@ Machine::OneInstruction(Instruction *instr)
 	else
 	    registers[instr->rd] = 0;
 	break;
-      	
+
       case OP_SRA:
 	registers[instr->rd] = registers[instr->rt] >> instr->extra;
 	break;
-	
+
       case OP_SRAV:
 	registers[instr->rd] = registers[instr->rt] >>
 	    (registers[instr->rs] & 0x1f);
 	break;
-	
+
       case OP_SRL:
 	tmp = registers[instr->rt];
 	tmp >>= instr->extra;
 	registers[instr->rd] = tmp;
 	break;
-	
+
       case OP_SRLV:
 	tmp = registers[instr->rt];
 	tmp >>= (registers[instr->rs] & 0x1f);
 	registers[instr->rd] = tmp;
 	break;
-	
-      case OP_SUB:	  
+
+      case OP_SUB:
 	diff = registers[instr->rs] - registers[instr->rt];
 	if (((registers[instr->rs] ^ registers[instr->rt]) & SIGN_BIT) &&
 	    ((registers[instr->rs] ^ diff) & SIGN_BIT)) {
@@ -543,18 +536,18 @@ Machine::OneInstruction(Instruction *instr)
 	}
 	registers[instr->rd] = diff;
 	break;
-      	
+
       case OP_SUBU:
 	registers[instr->rd] = registers[instr->rs] - registers[instr->rt];
 	break;
-	
+
       case OP_SW:
-	if (!WriteMem((unsigned) 
+	if (!WriteMem((unsigned)
 		(registers[instr->rs] + instr->extra), 4, registers[instr->rt]))
 	    return;
 	break;
-	
-      case OP_SWL:	  
+
+      case OP_SWL:
 	tmp = registers[instr->rs] + instr->extra;
 
 #ifdef SIM_FIX
@@ -574,7 +567,7 @@ Machine::OneInstruction(Instruction *instr)
 
 	// The little endian/big endian swap code would
         // fail (I think) if the other cases are ever exercised.
-	ASSERT((tmp & 0x3) == 0);  
+	ASSERT((tmp & 0x3) == 0);
 
 	if (!ReadMem((tmp & ~0x3), 4, &value))
 	    return;
@@ -583,7 +576,7 @@ Machine::OneInstruction(Instruction *instr)
 #ifdef SIM_FIX
 	switch( 3 - byte )
 #else
-	  switch (tmp & 0x3) 
+	  switch (tmp & 0x3)
 #endif // SIM_FIX
 	    {
 	  case 0:
@@ -612,23 +605,23 @@ Machine::OneInstruction(Instruction *instr)
             return;
 #endif // SIM_FIX
 	break;
-    	
-      case OP_SWR:	  
+
+      case OP_SWR:
 	tmp = registers[instr->rs] + instr->extra;
 
 #ifndef SIM_FIX
         // The little endian/big endian swap code would
         // fail (I think) if the other cases are ever exercised.
-        ASSERT((tmp & 0x3) == 0);  
+        ASSERT((tmp & 0x3) == 0);
 
         if (!ReadMem((tmp & ~0x3), 4, &value))
             return;
 #else
         // The only difference between this code and the BIG ENDIAN code
-        // is that the ReadMem call is guaranteed an aligned access as 
-        // it should be (Kane's book hides the fact that all memory 
-        // access are done using aligned loads - what the instruction 
-        // asks for is a arbitrary) This is the whole purpose of LWL 
+        // is that the ReadMem call is guaranteed an aligned access as
+        // it should be (Kane's book hides the fact that all memory
+        // access are done using aligned loads - what the instruction
+        // asks for is a arbitrary) This is the whole purpose of LWL
         // and LWR etc.
 
         byte = tmp & 0x3;
@@ -640,9 +633,9 @@ Machine::OneInstruction(Instruction *instr)
 #endif // SIM_FIX
 
 #ifndef SIM_FIX
-        switch (tmp & 0x3) 
+        switch (tmp & 0x3)
 #else
-	  switch( 3 - byte ) 
+	  switch( 3 - byte )
 #endif // SIM_FIX
 	    {
 	    case 0:
@@ -671,34 +664,34 @@ Machine::OneInstruction(Instruction *instr)
 
 
 	break;
-    	
+
       case OP_SYSCALL:
 	DEBUG(dbgTraCode, "In Machine::OneInstruction, RaiseException(SyscallException, 0), " << kernel->stats->totalTicks);
 	RaiseException(SyscallException, 0);
-	return; 
-	
+	return;
+
       case OP_XOR:
 	registers[instr->rd] = registers[instr->rs] ^ registers[instr->rt];
 	break;
-	
+
       case OP_XORI:
 	registers[instr->rt] = registers[instr->rs] ^ (instr->extra & 0xffff);
 	break;
-	
+
       case OP_RES:
       case OP_UNIMP:
 	RaiseException(IllegalInstrException, 0);
 	return;
-	
+
       default:
 	ASSERT(FALSE);
     }
-    
+
     // Now we have successfully executed the instruction.
-    
+
     // Do any delayed load operation
     DelayedLoad(nextLoadReg, nextLoadValue);
-    
+
     // Advance program counters.
     registers[PrevPCReg] = registers[PCReg];	// for debugging, in case we
 						// are jumping into lala-land
@@ -725,14 +718,14 @@ Machine::DelayedLoad(int nextReg, int nextValue)
 
 //----------------------------------------------------------------------
 // Instruction::Decode
-// 	Decode a MIPS instruction 
+// 	Decode a MIPS instruction
 //----------------------------------------------------------------------
 
 void
 Instruction::Decode()
 {
     OpInfo *opPtr;
-    
+
     rs = (value >> 21) & 0x1f;
     rt = (value >> 16) & 0x1f;
     rd = (value >> 11) & 0x1f;
@@ -814,7 +807,7 @@ Mult(int a, int b, bool signedArith, int* hiPtr, int* loPtr)
 	bHi <<= 1;
 	if (bLo & 0x80000000)
 	    bHi |= 1;
-	
+
 	bLo <<= 1;
 	a >>= 1;
     }
@@ -828,7 +821,7 @@ Mult(int a, int b, bool signedArith, int* hiPtr, int* loPtr)
 	if (lo == 0)
 	    hi++;
     }
-    
+
     *hiPtr = (int) hi;
     *loPtr = (int) lo;
 }

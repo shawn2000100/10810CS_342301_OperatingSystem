@@ -55,7 +55,6 @@ Debug *debug;
 // Cleanup
 //	Delete kernel data structures; called when user hits "ctl-C".
 //----------------------------------------------------------------------
-
 static void 
 Cleanup(int x) 
 {     
@@ -68,7 +67,7 @@ Cleanup(int x)
 //   It is the number of bytes read from the Unix file (for Copy)
 //   or the Nachos file (for Print) by each read operation
 //-------------------------------------------------------------------
-static const int TransferSize = 128;
+static const int TransferSize = 128; // 191007[J]:file sys 的 buffer size (byres)
 
 
 #ifndef FILESYS_STUB
@@ -76,11 +75,10 @@ static const int TransferSize = 128;
 // Copy
 //      Copy the contents of the UNIX file "from" to the Nachos file "to"
 //----------------------------------------------------------------------
-
 static void
 Copy(char *from, char *to)
 {
-    int fd;
+    int fd; // 191007[J]: fd是什麼?
     OpenFile* openFile;
     int amountRead, fileLength;
     char *buffer;
@@ -104,6 +102,7 @@ Copy(char *from, char *to)
         return;
     }
     
+    // 191007[J]: 開啟檔案的方式是調用kernel->fileSys->Open函式
     openFile = kernel->fileSystem->Open(to);
     ASSERT(openFile != NULL);
     
@@ -124,7 +123,6 @@ Copy(char *from, char *to)
 // Print
 //      Print the contents of the Nachos file "name".
 //----------------------------------------------------------------------
-
 void
 Print(char *name)
 {
@@ -162,7 +160,7 @@ Print(char *name)
 //	"argv" is an array of strings, one for each command line argument
 //		ex: "nachos -d +" -> argv = {"nachos", "-d", "+"}
 //----------------------------------------------------------------------
-
+// 191007[J]: 運作nachos 主程式開始執行
 int
 main(int argc, char **argv)
 {
@@ -249,7 +247,7 @@ main(int argc, char **argv)
 
     kernel = new Kernel(argc, argv);
 
-    kernel->Initialize();
+    kernel->Initialize(); // 191010[J]: OS的初始化就從這裡開始了?
 
     CallOnUserAbort(Cleanup);		// if user hits ctl-C
 
@@ -290,7 +288,7 @@ main(int argc, char **argv)
     // Calling "return" would terminate the program.
     // Instead, call Halt, which will first clean up, then
     //  terminate.
-//    kernel->interrupt->Halt();
+//    kernel->interrupt->Halt(); // 191007[J]: ?
     
     ASSERTNOTREACHED();
 }

@@ -18,10 +18,6 @@
 //	us to wrap all C definitions with a "extern "C" block".
 // 	This prevents the internal forms of the names from being
 // 	changed by the C++ compiler.
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
 #include "debug.h"
@@ -303,7 +299,7 @@ PollFile(int fd)
 //
 //	"name" -- file name
 //----------------------------------------------------------------------
-
+// 1910010[J]: 這邊感覺是HW1的關鍵!?
 int
 OpenForWrite(char *name)
 {
@@ -320,7 +316,7 @@ OpenForWrite(char *name)
 //
 //	"name" -- file name
 //----------------------------------------------------------------------
-
+// 1910010[J]: !?
 int
 OpenForReadWrite(char *name, bool crashOnError)
 {
@@ -334,7 +330,7 @@ OpenForReadWrite(char *name, bool crashOnError)
 // Read
 // 	Read characters from an open file.  Abort if read fails.
 //----------------------------------------------------------------------
-
+// 1910010[J]: !
 void
 Read(int fd, char *buffer, int nBytes)
 {
@@ -347,7 +343,7 @@ Read(int fd, char *buffer, int nBytes)
 // 	Read characters from an open file, returning as many as are
 //	available.
 //----------------------------------------------------------------------
-
+// 1910010[J]: !
 int
 ReadPartial(int fd, char *buffer, int nBytes)
 {
@@ -359,7 +355,7 @@ ReadPartial(int fd, char *buffer, int nBytes)
 // WriteFile
 // 	Write characters to an open file.  Abort if write fails.
 //----------------------------------------------------------------------
-
+// 1910010[J]: !
 void
 WriteFile(int fd, char *buffer, int nBytes)
 {
@@ -401,7 +397,7 @@ Tell(int fd)
 // Close
 // 	Close a file.  Abort on error.
 //----------------------------------------------------------------------
-
+// 1910010[J]: !
 int 
 Close(int fd)
 {

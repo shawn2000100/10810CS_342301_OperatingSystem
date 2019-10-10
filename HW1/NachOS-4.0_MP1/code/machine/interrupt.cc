@@ -15,10 +15,6 @@
 //		there is nothing in the ready queue
 //
 //  DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
 #include "interrupt.h"
@@ -233,14 +229,16 @@ Interrupt::Idle()
 // Interrupt::Halt
 // 	Shut down Nachos cleanly, printing out performance statistics.
 //----------------------------------------------------------------------
+// 1910010[J]: Halt在這邊實作...?
 void
 Interrupt::Halt()
 {
     cout << "Machine halting!\n\n";
     cout << "This is halt\n";
     kernel->stats->Print();
-    delete kernel;	// Never returns.
+    delete kernel;	// Never returns. // 1910010[J]:kernel已經被delete掉了，所以程式停機?
 }
+// 1910010[J]: 不太懂為什麼下面註解掉本次作業的4個function，但是在hint那邊並沒有說我們要更改interrupt.cc這個檔案...
 /*
 void 
 Interrupt::PrintInt(int number)
@@ -303,7 +301,7 @@ Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
     DEBUG(dbgInt, "Scheduling interrupt handler the " << intTypeNames[type] << " at time = " << when);
     ASSERT(fromNow > 0);
 
-    pending->Insert(toOccur);
+    pending->Insert(toOccur); // 1910010[J]: Register interrupt callback function in pending queue
 }
 
 //----------------------------------------------------------------------
@@ -354,9 +352,9 @@ Interrupt::CheckIfDue(bool advanceClock)
 
     inHandler = TRUE;
     do {
-        next = pending->RemoveFront();    // pull interrupt off list
+        next = pending->RemoveFront();    // pull interrupt off list // 1910010[J]: Pull interrupt from pending queue
 		DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, into callOnInterrupt->CallBack, " << stats->totalTicks);
-        next->callOnInterrupt->CallBack();// call the interrupt handler
+        next->callOnInterrupt->CallBack();// call the interrupt handler // 1910010[J]: Call interrupt service routine (callback function)
 		DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, return from callOnInterrupt->CallBack, " << stats->totalTicks);
 	delete next;
     } while (!pending->IsEmpty() 

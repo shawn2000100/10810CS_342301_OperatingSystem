@@ -17,11 +17,6 @@
 //	because a class can only register a single callback.
 //
 //  DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
-//
 
 #ifndef CALLBACK_H
 #define CALLBACK_H 

@@ -1,10 +1,6 @@
 // kernel.h
 //	Global variables for the Nachos kernel.
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
-
+// 
 #ifndef KERNEL_H
 #define KERNEL_H
 
@@ -37,7 +33,7 @@ class Kernel {
 				// from constructor because 
 				// refers to "kernel" as a global
     void ExecAll();
-    int Exec(char* name);
+    int Exec(char* name); // 1910010[J]: 創造一條thread並分配資源
     void ThreadSelfTest();	// self test of threads and synchronization
 	
     void ConsoleTest();         // interactive console self test
@@ -48,6 +44,7 @@ class Kernel {
     void PrintInt(int number); 	
     int CreateFile(char* filename); // fileSystem call
     
+    // 1910010[J]: 似乎syscall.h裡面定義的function也要在kernel.h中宣告? 但這邊已經幫我們宣告好了，故不用更動
     OpenFileId OpenFile(char* name); // fileSystem call
     int WriteFile(char* buffer, int size, OpenFileId id); // fileSystem call
     int ReadFile(char* buffer, int size, OpenFileId id); // fileSystem call
@@ -73,8 +70,8 @@ class Kernel {
 
   private:
 
-	Thread* t[10];
-	char*   execfile[10];
+	Thread* t[10]; // 1910010[J]: 在其他地方看到的 t 代表是thread的意思
+	char*   execfile[10]; 
 	int execfileNum;
 	int threadNum;
     bool randomSlice;		// enable pseudo-random time slicing

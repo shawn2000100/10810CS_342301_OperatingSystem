@@ -3,10 +3,8 @@
 //	here, rather than directly calling the UNIX library functions, to
 //	simplify porting between versions of UNIX, and even to
 //	other systems, such as MSDOS and the Macintosh.
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: 似乎是透過這個檔案來直接呼叫底層的UNIX指令的...?
 
 #ifndef SYSDEP_H
 #define SYSDEP_H

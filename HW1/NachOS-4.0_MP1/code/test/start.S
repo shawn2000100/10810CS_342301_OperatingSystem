@@ -4,6 +4,9 @@
  *	Since we don't want to pull in the entire C library, we define
  *	what we need for a user program here, namely Start and the system
  *	calls.
+ *
+ * 1910010[J]: Hint: 這個檔案需要被修改!
+ *
  */
 
 #define IN_ASM

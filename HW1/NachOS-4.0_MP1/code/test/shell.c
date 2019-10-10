@@ -1,5 +1,5 @@
 #include "syscall.h"
-
+// 1910010[J]: cmd的實作，透過ConsoldInput/Output來呼叫對應的動作(SysCall)，應該不需要更動
 int
 main()
 {

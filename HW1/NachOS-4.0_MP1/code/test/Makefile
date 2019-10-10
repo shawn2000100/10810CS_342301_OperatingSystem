@@ -113,6 +113,7 @@ PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
 #PROGRAMS = add halt shell matmult sort segments test1 test2 a
+# // 1910010[J]: 假如新增任何新的test program，就要更動MAKEFILE，但是本次作業已經幫我們寫好了，所以不用理他
 PROGRAMS = add halt createFile fileIO_test1 fileIO_test2
 endif
 

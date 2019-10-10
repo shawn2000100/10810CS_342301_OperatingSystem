@@ -25,10 +25,8 @@
 //	but it wouldn't work on real hardware.
 //
 //  DO NOT CHANGE -- part of the machine emulation
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 1910010[J]: Hint: 這個檔案需要被修改!
 
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
@@ -94,10 +92,10 @@ class Interrupt {
 				// simulated time forward until the 
 				// next interrupt
 
-    void Halt(); 		// quit and print out stats
+    void Halt(); 		// quit and print out stats // 1910010[J]: Halt在這邊被實作...? 
 
     void PrintInt(int number); // print int
-    
+    // 1910010[J]: 不太懂為什麼下面註解掉本次作業的4個function，但是在hint那邊並沒有說我們要更改interrupt.cc這個檔案...
     int CreateFile(char *filename);
     OpenFileId OpenFile(char *name);
     int WriteFile(char *buffer, int size, OpenFileId id);

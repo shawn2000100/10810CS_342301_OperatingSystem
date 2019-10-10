@@ -1,9 +1,6 @@
 // kernel.cc 
 //	Initialization and cleanup routines for the Nachos kernel.
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
 
 #include "copyright.h"
 #include "debug.h"
@@ -23,7 +20,6 @@
 // 	Interpret command line arguments in order to determine flags 
 //	for the initialization (see also comments in main.cc)  
 //----------------------------------------------------------------------
-
 Kernel::Kernel(int argc, char **argv)
 {
     randomSlice = FALSE; 
@@ -36,6 +32,7 @@ Kernel::Kernel(int argc, char **argv)
     reliability = 1;            // network reliability, default is 1.0
     hostName = 0;               // machine id, also UNIX socket name
                                 // 0 is the default machine id
+    // 191007[J]:-rs -ci -co...etc, 可參考 main.cc 最上面的說明
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-rs") == 0) {
  	    	ASSERT(i + 1 < argc);
@@ -46,6 +43,7 @@ Kernel::Kernel(int argc, char **argv)
         } else if (strcmp(argv[i], "-s") == 0) {
             debugUserProg = TRUE;
 		} else if (strcmp(argv[i], "-e") == 0) {
+          // 191007[J]:execfile定義於kernel.h 的 char* execfile[10];
         	execfile[++execfileNum]= argv[++i];
 			cout << execfile[execfileNum] << "\n";
 		} else if (strcmp(argv[i], "-ci") == 0) {
@@ -86,7 +84,6 @@ Kernel::Kernel(int argc, char **argv)
 //	constructor because some of these refer to earlier initialized
 //	data via the "kernel" global variable.
 //----------------------------------------------------------------------
-
 void
 Kernel::Initialize()
 {
@@ -121,7 +118,7 @@ Kernel::Initialize()
 // Kernel::~Kernel
 // 	Nachos is halting.  De-allocate global data structures.
 //----------------------------------------------------------------------
-
+// 1910010[J]: 解構子 不重要
 Kernel::~Kernel()
 {
     delete stats;
@@ -143,7 +140,7 @@ Kernel::~Kernel()
 // Kernel::ThreadSelfTest
 //      Test threads, semaphores, synchlists
 //----------------------------------------------------------------------
-
+// 1910010[J]: 測試thread, semaphore用，可能還不用動到
 void
 Kernel::ThreadSelfTest() {
    Semaphore *semaphore;
@@ -170,7 +167,7 @@ Kernel::ThreadSelfTest() {
 // Kernel::ConsoleTest
 //      Test the synchconsole
 //----------------------------------------------------------------------
-
+// 1910010[J]: 這邊應該只是單純測試輸出入  不重要
 void
 Kernel::ConsoleTest() {
     char ch;
@@ -201,7 +198,7 @@ Kernel::ConsoleTest() {
 //
 //  This test works best if each Nachos machine has its own window
 //----------------------------------------------------------------------
-
+// 1910010[J]: 測試網路，不用動到
 void
 Kernel::NetworkTest() {
 
@@ -248,6 +245,7 @@ Kernel::NetworkTest() {
     // Then we're done!
 }
 
+// 1910010[J]: ?
 void ForkExecute(Thread *t)
 {
 	if ( !t->space->Load(t->getName()) ) {
@@ -258,16 +256,17 @@ void ForkExecute(Thread *t)
 
 }
 
+// 1910010[J]: 依序執行全部的thread...?
 void Kernel::ExecAll()
 {
 	for (int i=1;i<=execfileNum;i++) {
 		int a = Exec(execfile[i]);
 	}
 	currentThread->Finish();
-    //Kernel::Exec();	
+    //Kernel::Exec();	// 1910010[J]: 註解掉的原因是...?
 }
 
-
+// 1910010[J]: 創造一條 thread 並分配資源?
 int Kernel::Exec(char* name)
 {
 	t[threadNum] = new Thread(name, threadNum);
@@ -276,6 +275,7 @@ int Kernel::Exec(char* name)
 	threadNum++;
 
 	return threadNum-1;
+// 1910010[J]: 這邊可能是以後要練習multi-thread才會用到的
 /*
     cout << "Total threads number is " << execfileNum << endl;
     for (int n=1;n<=execfileNum;n++) {

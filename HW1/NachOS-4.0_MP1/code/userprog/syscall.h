@@ -4,11 +4,10 @@
  *	via the "syscall" instruction.
  *
  *	This file is included by user programs and by the Nachos kernel. 
- *
- * Copyright (c) 1992-1993 The Regents of the University of California.
- * All rights reserved.  See copyright.h for copyright notice and limitation 
- * of liability and disclaimer of warranty provisions.
  */
+
+// 1910010[J]: Hint: 這個檔案需要被修改!
+// 1910010[J]: Hint: 目前有一點不太懂 ksyscall與syscall的差別
 
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
@@ -24,11 +23,11 @@
 #define SC_Join		3
 #define SC_Create	4
 #define SC_Remove       5
-//#define SC_Open	6
-//#define SC_Read	7
-//#define SC_Write	8
+#define SC_Open	6  // 1910010[J]: 這邊可能是需要實作的地方，需trace一下在哪邊被定義或呼叫的 (目前看來可能是start.S裡面會用到)
+#define SC_Read	7  // 1910010[J]: 這邊可能是需要實作的地方，需trace一下在哪邊被定義或呼叫的 (目前看來可能是start.S裡面會用到)
+#define SC_Write	8  // 1910010[J]: 這邊可能是需要實作的地方，需trace一下在哪邊被定義或呼叫的 (目前看來可能是start.S裡面會用到)
 #define SC_Seek         9
-//#define SC_Close	10
+#define SC_Close	10  // 1910010[J]: 這邊可能是需要實作的地方，需trace一下在哪邊被定義或呼叫的 (目前看來可能是start.S裡面會用到)
 #define SC_ThreadFork	11
 #define SC_ThreadYield	12
 #define SC_ExecV	13
@@ -39,6 +38,7 @@
 #define SC_MSG		100
 #ifndef IN_ASM
 
+// 1910010[J]: 這段註解滿重要的~
 /* The system call interface.  These are the operations the Nachos
  * kernel needs to support, to be able to run user programs.
  *
