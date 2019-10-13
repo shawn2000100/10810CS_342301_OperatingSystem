@@ -6,6 +6,7 @@
 // 1910010[J]: mipssim與machine這2份檔案就是在模擬真實CPU!
 // 1910010[J]: mipssim是在模擬mips的ISA
 // 1910010[J]: machine是在模擬真正的硬體
+// 191012[J]: RaiseException在模擬CPU中的例外處理電路，Kernel, User Mode在此進行轉換
 
 #include "copyright.h"
 #include "machine.h"
@@ -103,9 +104,9 @@ Machine::RaiseException(ExceptionType which, int badVAddr)
     DEBUG(dbgMach, "Exception: " << exceptionNames[which]);
     registers[BadVAddrReg] = badVAddr;
     DelayedLoad(0, 0);			// finish anything in progress
-    kernel->interrupt->setStatus(SystemMode);
-    ExceptionHandler(which);		// interrupts are enabled at this point
-    kernel->interrupt->setStatus(UserMode);
+    kernel->interrupt->setStatus(SystemMode); // 191012[J]: !
+    ExceptionHandler(which);		// interrupts are enabled at this point // 191012[J]: ! 硬體偵測到錯誤
+    kernel->interrupt->setStatus(UserMode); // 191012[J]: !
 }
 
 //----------------------------------------------------------------------

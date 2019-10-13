@@ -15,6 +15,9 @@
 #include "post.h"
 #include "synchconsole.h"
 
+// 191012[J]: 這裡其實沒有完整實作整個kernel，這裡只實作了初始化的功能而已
+// 191007[J]: 更多完整功能的定義被拆分到很多小檔案裏面: e.g., filesys.h... 
+
 //----------------------------------------------------------------------
 // Kernel::Kernel
 // 	Interpret command line arguments in order to determine flags 

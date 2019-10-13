@@ -45,10 +45,12 @@ class Kernel {
     int CreateFile(char* filename); // fileSystem call
     
     // 1910010[J]: 似乎syscall.h裡面定義的function也要在kernel.h中宣告? 但這邊已經幫我們宣告好了，故不用更動
-    OpenFileId OpenFile(char* name); // fileSystem call
-    int WriteFile(char* buffer, int size, OpenFileId id); // fileSystem call
-    int ReadFile(char* buffer, int size, OpenFileId id); // fileSystem call
-    int CloseFile(OpenFileId id); // fileSystem call
+    // 1910010[J]: 這邊的4個function與filesys.h的4個function互相對照，實作的部分可能就是被定義在filesys.h那邊
+    // 191012[J]: 由exception.cc  #include "main.h"，而"main.h"又#include "kernel.h"，kernel則#include "machine.h", "filesys.h"
+    OpenFileId OpenFile(char* name); // fileSystem call // 191012[J]: kernel.h這邊定義了介面，而真正的實作則是在filesys.h裡面，可使用grep -nr CloseFile 來查驗
+    int WriteFile(char* buffer, int size, OpenFileId id); // fileSystem call // 191012[J]: kernel.h這邊定義了介面，而真正的實作則是在filesys.h裡面，可使用grep -nr CloseFile 來查驗
+    int ReadFile(char* buffer, int size, OpenFileId id); // fileSystem call // 191012[J]: kernel.h這邊定義了介面，而真正的實作則是在filesys.h裡面，可使用grep -nr CloseFile 來查驗
+    int CloseFile(OpenFileId id); // fileSystem call // 191012[J]: kernel.h這邊定義了介面，而真正的實作則是在filesys.h裡面，可使用grep -nr CloseFile 來查驗
 
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.

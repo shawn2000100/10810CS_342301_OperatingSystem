@@ -33,9 +33,8 @@
 //  Note: the file system flags are not used if the stub filesystem
 //        is being used
 //
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+// 191012[J]: 感覺下面的Print跟Copy可以作為MP1實作方面的參考 (錯誤處理)
 
 #define MAIN
 #include "copyright.h"
@@ -78,7 +77,7 @@ static const int TransferSize = 128; // 191007[J]:file sys 的 buffer size (byres
 static void
 Copy(char *from, char *to)
 {
-    int fd; // 191007[J]: fd是什麼?
+    int fd; // 191007[J]: fd是什麼? // 191012[J]: fd應該是Open()的回傳值，用來做錯誤處理用的
     OpenFile* openFile;
     int amountRead, fileLength;
     char *buffer;

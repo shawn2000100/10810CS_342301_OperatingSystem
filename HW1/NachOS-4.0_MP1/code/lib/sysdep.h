@@ -6,6 +6,12 @@
 
 // 1910010[J]: 似乎是透過這個檔案來直接呼叫底層的UNIX指令的...?
 
+// 191012[J]: Hint: You can use the file operations defined in lib/sysdep.cc
+
+// 191012[J]: 這邊直接透過C語言本身提供的standard library (可間接呼叫Host的System Call) ，來達到 "stub" 的目的
+// 191012[J]: 故MP1中的file operation實作其實只是繞了一大圈來呼叫 C語言本身的standard library而已
+// 191012[J]: 路徑大約是: exception.cc --> ksyscall.h --> filesys.h --> sysdep.h --> #include <stdlib.h>
+
 #ifndef SYSDEP_H
 #define SYSDEP_H
 

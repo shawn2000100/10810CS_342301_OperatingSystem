@@ -26,8 +26,6 @@
 //
 //  DO NOT CHANGE -- part of the machine emulation
 
-// 1910010[J]: Hint: 這個檔案需要被修改!
-
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 

@@ -19,6 +19,16 @@
 // 	This prevents the internal forms of the names from being
 // 	changed by the C++ compiler.
 
+// 1910010[J]: 似乎是透過這個檔案來直接呼叫底層的UNIX指令的...?
+
+// 191012[J]: Hint: You can use the file operations defined in lib/sysdep.cc
+
+// 191012[J]: 這邊直接透過C語言本身提供的standard library (可間接呼叫Host的System Call) ，來達到 "stub" 的目的
+// 191012[J]: 故MP1中的file operation實作其實只是繞了一大圈來呼叫 C語言本身的standard library而已
+// 191012[J]: 路徑大約是: exception.cc --> ksyscall.h --> filesys.h --> sysdep.h --> #include <stdlib.h>
+
+// 191012[J]: 這個檔案其實就是直接調用 <stdlib.h> 裡的open, read...etc, 功能，只是包了好幾層而已
+
 #include "copyright.h"
 #include "debug.h"
 #include "sysdep.h"
@@ -356,7 +366,7 @@ ReadPartial(int fd, char *buffer, int nBytes)
 // 	Write characters to an open file.  Abort if write fails.
 //----------------------------------------------------------------------
 // 1910010[J]: !
-void
+void // 191012[J]: 不明原因，這邊用void...?
 WriteFile(int fd, char *buffer, int nBytes)
 {
     //printf("In sysdep.cc, nBytes: %d\n", nBytes);

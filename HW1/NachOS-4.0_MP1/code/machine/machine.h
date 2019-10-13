@@ -16,7 +16,8 @@
 
 // 1910010[J]: mipssim與machine這2份檔案就是在模擬真實CPU!
 // 1910010[J]: mipssim是在模擬mips的ISA
-// 1910010[J]: machine是在模擬真正的硬體
+// 1910010[J]: machine是在模擬真正的硬體CPU
+// 191012[J]: 這份檔案多看幾遍後好像對OS的運作又更了解了...
 
 #ifndef MACHINE_H
 #define MACHINE_H
@@ -39,7 +40,7 @@ const int NumPhysPages = 128;
 
 const int MemorySize = (NumPhysPages * PageSize);
 const int TLBSize = 4;			// if there is a TLB, make it small
-
+// 191012[J]: 這邊定義了Exception的類型們，或許SysCall是Exception的其中一種
 enum ExceptionType { NoException,           // Everything ok!
 		     SyscallException,      // A program executed a system call.
 		     PageFaultException,    // No valid translation found
@@ -73,7 +74,7 @@ enum ExceptionType { NoException,           // Everything ok!
 #define LoadValueReg 	38	// The value to be loaded by a delayed load.
 #define BadVAddrReg	39	// The failing virtual address on an exception
 
-#define NumTotalRegs 	40 // 1910010[J]: NachOS似乎有40種Register
+#define NumTotalRegs 	40 // 1910010[J]: NachOS似乎有40種Register...?
 
 // The following class defines the simulated host workstation hardware, as 
 // seen by user programs -- the CPU registers, main memory, etc.

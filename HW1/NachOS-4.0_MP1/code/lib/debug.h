@@ -5,10 +5,6 @@
 //	debugging messages, controllable from the command line arguments
 //	passed to Nachos (-d).  You are encouraged to add your own
 //	debugging flags.  Please.... 
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
 #ifndef DEBUG_H
 #define DEBUG_H

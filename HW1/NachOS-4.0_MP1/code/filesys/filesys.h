@@ -61,12 +61,24 @@ class FileSystem {
 	return new OpenFile(fileDescriptor);
     }
 
-  
+
+//  1910010[J]: 這邊應該是MP1需要實作的關鍵之一!
+//  1910010[J]: 這邊的4個function與kernel.h的4個function互相對照，實作的部分可能就是被定義在這邊!
+//  1910010[J]: 改的過程可能會需要利用到sysdep.h裡面的功能!?
 //  The OpenAFile function is used for kernel open system call
-/*  OpenFileId OpenAFile(char *name) {
+    OpenFileId OpenAFile(char *name) 
+    {
+    	int fileDescriptor = OpenForReadWrite(name, FALSE);
+    	return fileDescriptor;
     }
-    int WriteFile(char *buffer, int size, OpenFileId id){
+    
+    int WriteFile0(char *buffer, int size, OpenFileId id){ 
+    //  191012[J]: 因為跟sysdep裡的WriteFile有命名衝突，而我又不熟namespce，故尾部加上0
+      WriteFile(id, buffer, size);
+      return size;
     }
+
+/*
     int ReadFile(char *buffer, int size, OpenFileId id){
     }
     int CloseFile(OpenFileId id){

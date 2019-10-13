@@ -239,6 +239,7 @@ Interrupt::Halt()
     delete kernel;	// Never returns. // 1910010[J]:kernel已經被delete掉了，所以程式停機?
 }
 // 1910010[J]: 不太懂為什麼下面註解掉本次作業的4個function，但是在hint那邊並沒有說我們要更改interrupt.cc這個檔案...
+// 191012[J]: 感覺file operation是要透過kernel->fileSystem->op()來達成，而Halt則是透過kernel->interrupt->Halt() 來達成。 故本次作業無須修改到interrupt.h
 /*
 void 
 Interrupt::PrintInt(int number)

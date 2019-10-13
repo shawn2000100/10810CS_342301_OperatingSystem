@@ -10,6 +10,10 @@
 // 1910010[J]: mipssim是在模擬mips的ISA
 // 1910010[J]: machine是在模擬真正的硬體
 
+// 191012[J]: 這邊定義了MIPS的Assembly code
+// 191012[J]: Run, OneInstruction可以追蹤一下，挺有趣的
+// 191012[J]: 這邊定義了MIPS的Assembly code 而mipssim.cc的實作中會順便 (偵測) RaiseException ，硬體發出exception後會轉換到Kernel Mode，並將Exception丟給exception Handler
+
 #include "copyright.h"
 #include "debug.h"
 #include "machine.h"
@@ -46,7 +50,6 @@ class Instruction {
 //	This routine is re-entrant, in that it can be called multiple
 //	times concurrently -- one for each thread executing user code.
 //----------------------------------------------------------------------
-
 void
 Machine::Run()
 {
@@ -56,7 +59,7 @@ Machine::Run()
         cout << "Starting program in thread: " << kernel->currentThread->getName();
 	cout << ", at time: " << kernel->stats->totalTicks << "\n";
     }
-    kernel->interrupt->setStatus(UserMode);
+    kernel->interrupt->setStatus(UserMode); // 191012[J]: Program平常是跑在UserMode下面，需要Syscall時會轉換為KernelMode
     for (;;) {
 	DEBUG(dbgTraCode, "In Machine::Run(), into OneInstruction " << "== Tick " << kernel->stats->totalTicks << " ==");
         OneInstruction(instr);
@@ -104,6 +107,7 @@ TypeToReg(RegType reg, Instruction *instr)
 //	case any of our state has changed.  On a syscall,
 // 	the OS software must increment the PC so execution begins
 // 	at the instruction immediately after the syscall.
+//  191012[J]: 這段或可幫助理解Exception與Handler的關係
 //
 //	This routine is re-entrant, in that it can be called multiple
 //	times concurrently -- one for each thread executing user code.

@@ -6,9 +6,7 @@
 //	The user level CPU state is saved and restored in the thread
 //	executing the user program (see thread.h).
 //
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+// 191012[J]: 這邊是一些記憶體管理跟CPU載入程式來執行的東西，挺有趣的
 
 #ifndef ADDRSPACE_H
 #define ADDRSPACE_H

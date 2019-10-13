@@ -17,6 +17,8 @@
  *      ALSO NOTE: These definitions may not correspond to Solaris definitions
  *      (for copyright reasons these are taken from Linux).
  */
+ 
+// 191012[J]: 這邊定義了Sys calls的錯誤碼，有遇到再回來看就好了
 
 #ifndef ERRNO_H
 #define ERRNO_H

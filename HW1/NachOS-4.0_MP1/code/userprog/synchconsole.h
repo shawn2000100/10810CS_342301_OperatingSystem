@@ -3,10 +3,7 @@
 //	and console display devices.
 //
 //	NOTE: this abstraction is not completely implemented.
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+//  191010[J]: 這份檔案定義了終端機的I/O，目前應該是不用理他
 
 #ifndef SYNCHCONSOLE_H
 #define SYNCHCONSOLE_H

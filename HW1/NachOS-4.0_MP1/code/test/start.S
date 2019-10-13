@@ -6,7 +6,6 @@
  *	calls.
  *
  * 1910010[J]: Hint: 這個檔案需要被修改!
- *
  */
 
 #define IN_ASM
@@ -40,7 +39,9 @@ __start:
  *	system call alone (in other words, arg1 is in r4, arg2 is 
  *	in r5, arg3 is in r6, arg4 is in r7)
  *
- * 	The return value is in r2. This follows the standard C calling
+ *  // 191012[J]: 這段註解解釋了how system call makes?
+ * 	
+ *  The return value is in r2. This follows the standard C calling
  * 	convention on the MIPS.
  * -------------------------------------------------------------
  */
@@ -164,7 +165,38 @@ ThreadJoin:
 	syscall
 	j 	$31
 	.end ThreadJoin
+ 
+	.globl Open
+	.ent	Open
+Open:
+	addiu $2,$0,SC_Open
+	syscall
+	j	$31
+	.end Open
+ 
+	.globl Write
+	.ent	Write
+Write:
+	addiu $2,$0,SC_Write
+	syscall
+	j	$31
+	.end Write
 
+	.globl Read
+	.ent	Read
+Read:
+	addiu $2,$0,SC_Read
+	syscall
+	j	$31
+	.end Read
+ 
+	.globl Close
+	.ent	Close
+Close:
+	addiu $2,$0,SC_Close
+	syscall
+	j	$31
+	.end Close
 
 /* dummy function to keep gcc happy */
         .globl  __main

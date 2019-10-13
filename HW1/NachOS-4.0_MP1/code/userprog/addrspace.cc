@@ -10,10 +10,7 @@
 //	3. load the NOFF file into the Nachos file system
 //		(if you are using the "stub" file system, you
 //		don't need to do this last step)
-//
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+// 191012[J]: 可觀察Load是如何將obj code轉成noff並載入記憶體
 
 #include "copyright.h"
 #include "main.h"

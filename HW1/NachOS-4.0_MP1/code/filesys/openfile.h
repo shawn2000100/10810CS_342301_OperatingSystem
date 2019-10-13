@@ -13,9 +13,6 @@
 //	worry about concurrent accesses to the file system
 //	by different threads.
 //
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
 #ifndef OPENFILE_H
 #define OPENFILE_H
@@ -23,6 +20,8 @@
 #include "copyright.h"
 #include "utility.h"
 #include "sysdep.h"
+
+//  191012[J]: 在stub的模式下，openfile其實就是直接呼叫sysdep裡面的函式
 
 #ifdef FILESYS_STUB			// Temporarily implement calls to 
 					// Nachos file system as calls to UNIX!

@@ -38,10 +38,9 @@
 //	   there is no attempt to make the system robust to failures
 //	    (if Nachos exits in the middle of an operation that modifies
 //	    the file system, it may corrupt the disk)
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+//  1910010[J]: 從下面的ifndef ... 可推出MP1應該是完全不用動到這個檔案...
+
 #ifndef FILESYS_STUB
 
 #include "copyright.h"

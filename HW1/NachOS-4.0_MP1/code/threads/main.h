@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "kernel.h"
 
-extern Kernel *kernel;
+extern Kernel *kernel; // 191012[J]: extern聲明了Kernel在其他地方被定義(實作)
 extern Debug *debug;
 
 #endif // MAIN_H

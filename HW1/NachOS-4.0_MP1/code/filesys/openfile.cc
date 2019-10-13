@@ -6,10 +6,9 @@
 //
 //	Also as in UNIX, for convenience, we keep the file header in
 //	memory while the file is open.
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
+
+//  191012[J]: 從ifndef可推出應該只有在MP4的時候會需要動到這個檔案
+
 #ifndef FILESYS_STUB
 
 #include "copyright.h"
