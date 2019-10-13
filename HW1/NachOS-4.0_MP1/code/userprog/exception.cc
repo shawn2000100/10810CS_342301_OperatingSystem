@@ -162,13 +162,17 @@ ExceptionHandler(ExceptionType which)
       {
         DEBUG(dbgSys, "Write\n");
         val = kernel->machine->ReadRegister(4); 
+        cout << "val = " << val << endl;
         char *buffer = &(kernel->machine->mainMemory[val]);
     		cout << "buffer = " << buffer << endl;
         numChar = kernel->machine->ReadRegister(5); 
         fileID = kernel->machine->ReadRegister(6); 
+        cout << "fileID = " << fileID << endl;
     		status = SysWrite(buffer, numChar, fileID);
+       
         kernel->machine->WriteRegister(2, (int) status);
-    		// 191012[J]: 每一個功能結束後都要 Set Program Counter。之後要依序return, assertnotreached, break...
+    		
+        // 191012[J]: 每一個功能結束後都要 Set Program Counter。之後要依序return, assertnotreached, break...
     		kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg)); // set previous programm counter (debugging only)
     		kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
     		kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
@@ -176,42 +180,48 @@ ExceptionHandler(ExceptionType which)
     		ASSERTNOTREACHED();
         break;
       }     
-    /*
-      case SC_Read: 
-    DEBUG(dbgSys, "Read\n");
-    //val=kernel->machine->ReadRegister(4); 
-		//SysPrintInt(val);
-    //char *filename = &(kernel->machine->mainMemory[val]);
-		//cout << filename << endl;
-		//status = SysCreate(filename); // 191012[J]: systemcall細節其實是在ksyscall裡實作
-		//kernel->machine->WriteRegister(2, (int) status);
-		{ // 191012[J]: 每一個功能結束後都要 Set Program Counter。之後要依序return, assertnotreached, break...
-		kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg)); // set previous programm counter (debugging only)
-		kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-		kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
-		return;
-		ASSERTNOTREACHED();
-    break;
-    }
     
-      case SC_Close: 
-    DEBUG(dbgSys, "Close\n");
-    //val=kernel->machine->ReadRegister(4); 
-		//SysPrintInt(val);
-    //char *filename = &(kernel->machine->mainMemory[val]);
-		//cout << filename << endl;
-		//status = SysCreate(filename); // 191012[J]: systemcall細節其實是在ksyscall裡實作
-		//kernel->machine->WriteRegister(2, (int) status);
-		{ // 191012[J]: 每一個功能結束後都要 Set Program Counter。之後要依序return, assertnotreached, break...
-		kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg)); // set previous programm counter (debugging only)
-		kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-		kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
-		return;
-		ASSERTNOTREACHED();
-    break;
-    }
+      case SC_Read: 
+      {
+        DEBUG(dbgSys, "Read\n");
+        val = kernel->machine->ReadRegister(4); 
+        cout << "val = " << val << endl;
+        char *buffer = &(kernel->machine->mainMemory[val]);
+    		cout << "buffer = " << buffer << endl;
+        numChar = kernel->machine->ReadRegister(5); 
+        fileID = kernel->machine->ReadRegister(6); 
+        cout << "fileID = " << fileID << endl;
+    		
+    		status = SysRead(buffer, numChar, fileID);
+       
+    		kernel->machine->WriteRegister(2, (int) status);
+    		
+        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg)); // set previous programm counter (debugging only)
+    		kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+    		kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+    		return;
+    		ASSERTNOTREACHED();
+        break;
+      }
+    
+      case SC_Close:
+      { 
+        DEBUG(dbgSys, "Close\n");
+        fileID = kernel->machine->ReadRegister(4);
+        cout << "fileID = " << fileID << endl;
+        status = SysClose(fileID); 
+        
+    		kernel->machine->WriteRegister(2, (int) status);
+    		
+        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg)); // set previous programm counter (debugging only)
+    		kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+    		kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+    		return;
+    		ASSERTNOTREACHED();
+        break;
+      }
      //  191012[J]: -------------------------------------------------------------------------------
-     */     
+          
 	    case SC_Exit:
 			{
         DEBUG(dbgAddr, "Program exit\n");

@@ -78,13 +78,17 @@ class FileSystem {
       return size;
     }
 
-/*
+    //  191013[J]: 看了一下，這些函數的錯誤處理部分應該都還沒寫好
     int ReadFile(char *buffer, int size, OpenFileId id){
+      Read(id, buffer, size);
+      return size;
     }
-    int CloseFile(OpenFileId id){
-    }
-*/
 
+    //  191013[J]: 似乎太簡單ㄌ，感覺會有陷阱 需再檢查!
+    int CloseFile(OpenFileId id){
+      int ret = Close(id);
+      return ret >= 0 ? 1: -1;
+    }
 
     bool Remove(char *name) { return Unlink(name) == 0; }
 

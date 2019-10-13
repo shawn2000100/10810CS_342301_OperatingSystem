@@ -1,7 +1,5 @@
 #include "syscall.h"
-
-// 1910010[J]: 之後demo要跑的程式，可能要實作出syscall裡的Open, Read功能。下面才能編譯成功
-int main(void)
+int main()
 {
 	// you should run fileIO_test1 first before running this one
 	char test[26];
@@ -15,7 +13,7 @@ int main(void)
 	success = Close(fid);
 	if (success != 1) MSG("Failed on closing file");
 	for (i = 0; i < 26; ++i) {
-		if (test[i] != check[i]) MSG("Failed: reading wrong result");
+		if (test[i] != check[i]) MSG("Failed: reading wrong result"); //  191013[J]: 有點不懂為何這行不會報錯?
 	}
 	MSG("Passed! ^_^");
 	Halt();

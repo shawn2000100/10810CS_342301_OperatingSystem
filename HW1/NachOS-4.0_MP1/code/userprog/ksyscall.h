@@ -58,22 +58,21 @@ int SysWrite(char *buffer, int size, OpenFileId id)
 {
   return kernel->fileSystem->WriteFile0(buffer, size, id);
 }
-/*
+
 // Read ¡§size¡¨ characters from the file to the buffer, 
 // and return the number of characters actually read from the file. 
 // Return -1, if fail to read the file.
 int SysRead(char *buffer, int size, OpenFileId id)
 {
-
+  return kernel->fileSystem->ReadFile(buffer, size, id);
 }
 
 // Close the file with id. 
 // Return 1 if successfully close the file. Otherwise, return -1.
 int SysClose(OpenFileId id)
 {
-
+  return kernel->fileSystem->CloseFile(id);
 }
 // 1910010[J]: ----------------------------------------------------------
-*/
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

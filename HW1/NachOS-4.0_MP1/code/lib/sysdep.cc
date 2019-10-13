@@ -354,6 +354,7 @@ Read(int fd, char *buffer, int nBytes)
 //	available.
 //----------------------------------------------------------------------
 // 1910010[J]: !
+// 191013[J]: 其實有點不懂這個跟上面Read的差別...?
 int
 ReadPartial(int fd, char *buffer, int nBytes)
 {
