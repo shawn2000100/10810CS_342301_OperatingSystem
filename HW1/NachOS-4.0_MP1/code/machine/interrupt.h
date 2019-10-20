@@ -115,6 +115,7 @@ class Interrupt {
     // but they need to be public since they are called by the
     // hardware device simulators.
 
+    // // 191019[J]: 這邊應該是在幫Interrupt的執行順序做個排班(Schedule)
     void Schedule(CallBackObj *callTo, int when, IntType type);
     				// Schedule an interrupt to occur
 				// at time "when".  This is called

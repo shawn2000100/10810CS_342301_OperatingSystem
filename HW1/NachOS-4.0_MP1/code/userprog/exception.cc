@@ -3,6 +3,10 @@
 //	There are two kinds of things that can cause control to
 //	transfer back to here from user code:
 //
+//  // 191019[J]: 目前的感覺, syscall是user program執行中時主動發出trap給kernel來請求執行一些特殊指令
+//  // 191019[J]: 而exception是硬體執行時發出的例外狀況， Interrupt則有點像是軟體執行到一半突然需要做什麼 (搶奪某資源之類的) 而發出的
+//  // 191019[J]: Interrupt.cc 實作了軟體interrupt，與exception.cc很類似，都能造成控制權的轉移 (user -> kernel)
+//
 //	syscall -- The user code explicitly requests to call a procedure
 //	in the Nachos kernel.  Right now, the only function we support is
 //	"Halt".
@@ -13,13 +17,9 @@
 //
 //	Interrupts (which can also cause control to transfer from user
 //	code into the Nachos kernel) are handled elsewhere.
-//
-// For now, this only handles the Halt() system call.
-// Everything else core dumps.
 
 // 191010[J]: Hint: 這個檔案需要被修改!
 // 191012[J]: 從syscall.h找SC_代碼，再透過呼叫ksyscall來做到真正的systemcall
-// 191012[J]: 目前不是很清楚syscall, exception, interrupt, trap的詳細差別
 
 #include "copyright.h"
 #include "main.h"
@@ -27,7 +27,8 @@
 #include "ksyscall.h"
 //----------------------------------------------------------------------
 // ExceptionHandler
-// 	Entry point into the Nachos kernel.  Called when a user program
+// 191019[J]: 這段註解重要
+// 	**Entry point into the Nachos kernel**.  Called when a user program
 //	is executing, and either does a syscall, or generates an addressing
 //	or arithmetic exception.
 //
@@ -49,6 +50,7 @@
 //
 //  191012[J]:這段註解滿重要的
 //----------------------------------------------------------------------
+// 191019[J]: 這邊的ExceptionType定義於Machine.h中，以MP1來說是SysCallExcept
 void
 ExceptionHandler(ExceptionType which)
 {

@@ -1,7 +1,5 @@
 // kernel.cc 
 //	Initialization and cleanup routines for the Nachos kernel.
-
-
 #include "copyright.h"
 #include "debug.h"
 #include "main.h"
@@ -16,7 +14,7 @@
 #include "synchconsole.h"
 
 // 191012[J]: 這裡其實沒有完整實作整個kernel，這裡只實作了初始化的功能而已
-// 191007[J]: 更多完整功能的定義被拆分到很多小檔案裏面: e.g., filesys.h... 
+// 191012[J]: 更多完整功能的定義被拆分到很多小檔案裏面: e.g., filesys.h... 
 
 //----------------------------------------------------------------------
 // Kernel::Kernel
@@ -95,8 +93,8 @@ Kernel::Initialize()
     // object to save its state. 
 
 	
-    currentThread = new Thread("main", threadNum++);		
-    currentThread->setStatus(RUNNING);
+    currentThread = new Thread("main", threadNum++);	// 191019[J]: 主程式也是一條thread
+    currentThread->setStatus(RUNNING);                // 191019[J]: 跑起來!
 
     stats = new Statistics();		// collect statistics
     interrupt = new Interrupt;		// start up interrupt handling

@@ -40,7 +40,9 @@ const int NumPhysPages = 128;
 
 const int MemorySize = (NumPhysPages * PageSize);
 const int TLBSize = 4;			// if there is a TLB, make it small
-// 191012[J]: 這邊定義了Exception的類型們，或許SysCall是Exception的其中一種
+
+// 191012[J]: 這邊定義了Exception的類型們，SysCall是Exception的其中一種
+// 191019[J]: 在exception.cc中會用switch case(ExcepType) 來判定是哪一種Exception，以MP1來說是SysCallExcept
 enum ExceptionType { NoException,           // Everything ok!
 		     SyscallException,      // A program executed a system call.
 		     PageFaultException,    // No valid translation found
@@ -150,11 +152,12 @@ class Machine {
     void DelayedLoad(int nextReg, int nextVal);  	
 				// Do a pending delayed load (modifying a reg)
 
+    // 191019[J]: 這邊定義了 OneInstrc，然後在mipsim.cc那邊實作出來 (解讀OP CODE，呼叫exception...,etc.)
     void OneInstruction(Instruction *instr); 	
     				// Run one instruction of a user program.
     
 
-
+    // 191019[J]: 這邊應該是實作VM時才會用到的，在translate.cc那邊實作
     ExceptionType Translate(int virtAddr, int* physAddr, int size,bool writing);
     				// Translate an address, and check for 
 				// alignment.  Set the use and dirty bits in 
@@ -162,6 +165,7 @@ class Machine {
     				// and return an exception code if the 
 				// translation couldn't be completed.
 
+    // 191019[J]: 在mipssim.cc那邊實作了
     void RaiseException(ExceptionType which, int badVAddr);
 				// Trap to the Nachos kernel, because of a
 				// system call or other exception.  
@@ -182,6 +186,7 @@ class Machine {
     friend class Interrupt;		// calls DelayedLoad()    
 };
 
+// 191019[J]: 原來是在這邊宣告的!
 extern void ExceptionHandler(ExceptionType which);
 				// Entry point into Nachos for handling
 				// user system calls and exceptions

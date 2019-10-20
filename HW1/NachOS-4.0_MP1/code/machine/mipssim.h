@@ -8,6 +8,7 @@
 // 1910010[J]: machine是在模擬真正的硬體
 
 // 191012[J]: 這邊定義了MIPS的Assembly code 而mipssim.cc的實作中會順便 (偵測) RaiseException ，硬體發出exception後會轉換到Kernel Mode，並將Exception丟給exception Handler
+// 191019[J]: OP_SYSCALL	61 的OP CODE在這邊定義，可以了解一下
 
 #ifndef MIPSSIM_H
 #define MIPSSIM_H
@@ -84,7 +85,7 @@
 #define OP_SWR		58
 #define OP_XOR		59
 #define OP_XORI		60
-#define OP_SYSCALL	61
+#define OP_SYSCALL	61  // 191019[J]: !!! 
 #define OP_UNIMP	62
 #define OP_RES		63
 #define MaxOpcode	63

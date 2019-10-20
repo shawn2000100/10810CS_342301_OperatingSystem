@@ -10,9 +10,6 @@
 //
 //	NOTE: this abstraction is not completely implemented.
 //
-// Copyright (c) 1992-1996 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
-// of liability and disclaimer of warranty provisions.
 
 #ifndef ALARM_H
 #define ALARM_H

@@ -82,7 +82,7 @@ Copy(char *from, char *to)
     int amountRead, fileLength;
     char *buffer;
 
-// Open UNIX file
+// Open UNIX file // 191019[J]: 這段感覺是能拿來做參考的
     if ((fd = OpenForReadWrite(from,FALSE)) < 0) {       
         printf("Copy: couldn't open input file %s\n", from);
         return;
@@ -93,7 +93,7 @@ Copy(char *from, char *to)
     fileLength = Tell(fd);
     Lseek(fd, 0, 0);
 
-// Create a Nachos file of the same length
+// Create a Nachos file of the same length // 191019[J]:!
     DEBUG('f', "Copying file " << from << " of size " << fileLength <<  " to file " << to);
     if (!kernel->fileSystem->Create(to, fileLength)) {   // Create Nachos file
         printf("Copy: couldn't create output file %s\n", to);
@@ -129,7 +129,7 @@ Print(char *name)
     int i, amountRead;
     char *buffer;
 
-    if ((openFile = kernel->fileSystem->Open(name)) == NULL) {
+    if ((openFile = kernel->fileSystem->Open(name)) == NULL) { // 191019[J]: !
         printf("Print: unable to open file %s\n", name);
         return;
     }
@@ -181,29 +181,30 @@ main(int argc, char **argv)
     // some command line arguments are handled here.
     // those that set kernel parameters are handled in
     // the Kernel constructor
+    // 191019[J]: 這邊是用來處理 cmd 指令的
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-d") == 0) {
-	    ASSERT(i + 1 < argc);   // next argument is debug string
+      	    ASSERT(i + 1 < argc);   // next argument is debug string
             debugArg = argv[i + 1];
-	    i++;
-	}
-	else if (strcmp(argv[i], "-z") == 0) {
+	          i++;
+	      }
+      	else if (strcmp(argv[i], "-z") == 0) {
             cout << copyright << "\n";
-	}
-	else if (strcmp(argv[i], "-x") == 0) {
-	    ASSERT(i + 1 < argc);
-	    userProgName = argv[i + 1];
-	    i++;
-	}
-	else if (strcmp(argv[i], "-K") == 0) {
-	    threadTestFlag = TRUE;
-	}
-	else if (strcmp(argv[i], "-C") == 0) {
-	    consoleTestFlag = TRUE;
-	}
-	else if (strcmp(argv[i], "-N") == 0) {
-	    networkTestFlag = TRUE;
-	}
+      	}
+      	else if (strcmp(argv[i], "-x") == 0) {
+            ASSERT(i + 1 < argc);
+       	    userProgName = argv[i + 1];
+       	    i++;
+      	}
+      	else if (strcmp(argv[i], "-K") == 0) {
+      	    threadTestFlag = TRUE;
+      	}
+      	else if (strcmp(argv[i], "-C") == 0) {
+      	    consoleTestFlag = TRUE;
+      	}
+      	else if (strcmp(argv[i], "-N") == 0) {
+      	    networkTestFlag = TRUE;
+      	}
 #ifndef FILESYS_STUB
 	else if (strcmp(argv[i], "-cp") == 0) {
 	    ASSERT(i + 2 < argc);
@@ -228,25 +229,25 @@ main(int argc, char **argv)
 	    dumpFlag = true;
 	}
 #endif //FILESYS_STUB
-	else if (strcmp(argv[i], "-u") == 0) {
+    	  else if (strcmp(argv[i], "-u") == 0) {
             cout << "Partial usage: nachos [-z -d debugFlags]\n";
             cout << "Partial usage: nachos [-x programName]\n";
-	    cout << "Partial usage: nachos [-K] [-C] [-N]\n";
+	          cout << "Partial usage: nachos [-K] [-C] [-N]\n";
 #ifndef FILESYS_STUB
             cout << "Partial usage: nachos [-cp UnixFile NachosFile]\n";
             cout << "Partial usage: nachos [-p fileName] [-r fileName]\n";
             cout << "Partial usage: nachos [-l] [-D]\n";
 #endif //FILESYS_STUB
-	}
-
+	      }  
     }
+    
     debug = new Debug(debugArg);
     
     DEBUG(dbgThread, "Entering main");
 
     kernel = new Kernel(argc, argv);
 
-    kernel->Initialize(); // 191010[J]: OS的初始化就從這裡開始了?
+    kernel->Initialize(); 
 
     CallOnUserAbort(Cleanup);		// if user hits ctl-C
 
@@ -287,7 +288,7 @@ main(int argc, char **argv)
     // Calling "return" would terminate the program.
     // Instead, call Halt, which will first clean up, then
     //  terminate.
-//    kernel->interrupt->Halt(); // 191007[J]: ?
+//    kernel->interrupt->Halt(); // 191007[J]: ???
     
     ASSERTNOTREACHED();
 }

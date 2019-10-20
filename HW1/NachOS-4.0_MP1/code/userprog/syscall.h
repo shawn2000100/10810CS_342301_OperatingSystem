@@ -5,8 +5,8 @@
  *
  *	This file is included by user programs and by the Nachos kernel. 
  */
-
 // 1910010[J]: Hint: 這個檔案需要被修改!
+// 191019[J]: user透過system call來發出trap給kernel，所以每個要用到特別指令的user program都會#include "syscalls.h"
 
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
@@ -41,11 +41,11 @@
 /* The system call interface.  These are the operations the Nachos
  * kernel needs to support, to be able to run user programs.
  *
- * Each of these is invoked by a user program by simply calling the 
- * procedure; an assembly language stub stuffs the system call code
- * into a register, and traps to the kernel.  The kernel procedures
+ * **Each of these is invoked by a user program** by simply calling the 
+ * procedure; **an assembly language stub stuffs the system call code
+ * into a register, and traps to the kernel**.  The kernel procedures
  * are then invoked in the Nachos kernel, after appropriate error checking, 
- * from the system call entry point in exception.cc.
+ * from the system call entry point in **exception.cc.**
  */
 
 /* Stop Nachos, and print out performance stats */
@@ -53,15 +53,17 @@ void Halt();
 
 /* Print Integer */
 void PrintInt(int number); 
+
 /*
  * Add the two operants and return the result
  */ 
-
 int Add(int op1, int op2);
+
 /*
  * Just for simply showing message, not a safe way for console IO
  */
 void MSG(char *msg);
+
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 
@@ -107,6 +109,7 @@ typedef int OpenFileId;
  * keyboard input and display output (in UNIX terms, stdin and stdout).
  * Read and Write can be used directly on these, without first opening
  * the console device.
+ * // 191019[J]: 聽起來的意思是說stdin, stdout其實可以想成是兩個opened file @@
  */
 
 #define SysConsoleInput	0  

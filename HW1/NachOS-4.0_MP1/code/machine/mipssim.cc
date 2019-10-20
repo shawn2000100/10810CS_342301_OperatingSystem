@@ -13,6 +13,7 @@
 // 191012[J]: 這邊定義了MIPS的Assembly code
 // 191012[J]: Run, OneInstruction可以追蹤一下，挺有趣的
 // 191012[J]: 這邊定義了MIPS的Assembly code 而mipssim.cc的實作中會順便 (偵測) RaiseException ，硬體發出exception後會轉換到Kernel Mode，並將Exception丟給exception Handler
+// 191019[J]: 在680行左右，當Assembly 的 OPCODE為 61 (OP_SYSCALL) 時，會進行RaiseException的動作!!!
 
 #include "copyright.h"
 #include "debug.h"
@@ -46,6 +47,9 @@ class Instruction {
 // Machine::Run
 // 	Simulate the execution of a user-level program on Nachos.
 //	Called by the kernel when the program starts up; never returns.
+// 
+//  // 191019[J]: kernel那邊在初始化的時候就會call Machine::Run，然後就不會結束了
+//  // 191019[J]: 基本上每個thread都會一直call 他，來模擬機器執行的狀況
 //
 //	This routine is re-entrant, in that it can be called multiple
 //	times concurrently -- one for each thread executing user code.
@@ -57,20 +61,25 @@ Machine::Run()
 
     if (debug->IsEnabled('m')) {
         cout << "Starting program in thread: " << kernel->currentThread->getName();
-	cout << ", at time: " << kernel->stats->totalTicks << "\n";
+	      cout << ", at time: " << kernel->stats->totalTicks << "\n";
     }
+    
     kernel->interrupt->setStatus(UserMode); // 191012[J]: Program平常是跑在UserMode下面，需要Syscall時會轉換為KernelMode
+    
     for (;;) {
-	DEBUG(dbgTraCode, "In Machine::Run(), into OneInstruction " << "== Tick " << kernel->stats->totalTicks << " ==");
-        OneInstruction(instr);
-	DEBUG(dbgTraCode, "In Machine::Run(), return from OneInstruction  " << "== Tick " << kernel->stats->totalTicks << " ==");
-
-	DEBUG(dbgTraCode, "In Machine::Run(), into OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
-	kernel->interrupt->OneTick();
-	DEBUG(dbgTraCode, "In Machine::Run(), return from OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
-	if (singleStep && (runUntilTime <= kernel->stats->totalTicks))
-		Debugger();
-    }
+    DEBUG(dbgTraCode, "In Machine::Run(), into OneInstruction " << "== Tick " << kernel->stats->totalTicks << " ==");
+     
+      OneInstruction(instr);
+   	
+    DEBUG(dbgTraCode, "In Machine::Run(), return from OneInstruction  " << "== Tick " << kernel->stats->totalTicks << " ==");
+   	DEBUG(dbgTraCode, "In Machine::Run(), into OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
+    	
+      kernel->interrupt->OneTick();
+    	
+    DEBUG(dbgTraCode, "In Machine::Run(), return from OneTick " << "== Tick " << kernel->stats->totalTicks << " ==");
+	  if (singleStep && (runUntilTime <= kernel->stats->totalTicks))
+	  Debugger();
+   }
 }
 
 
@@ -100,14 +109,13 @@ TypeToReg(RegType reg, Instruction *instr)
 // Machine::OneInstruction
 // 	Execute one instruction from a user-level program
 //
-// 	If there is any kind of exception or interrupt, we invoke the
-//	exception handler, and when it returns, we return to Run(), which
+// 	**If there is any kind of exception or interrupt, we invoke the
+//	exception handler**, and when it returns, we return to Run(), which
 //	will re-invoke us in a loop.  This allows us to
 //	re-start the instruction execution from the beginning, in
 //	case any of our state has changed.  On a syscall,
 // 	the OS software must increment the PC so execution begins
 // 	at the instruction immediately after the syscall.
-//  191012[J]: 這段或可幫助理解Exception與Handler的關係
 //
 //	This routine is re-entrant, in that it can be called multiple
 //	times concurrently -- one for each thread executing user code.
@@ -119,6 +127,7 @@ TypeToReg(RegType reg, Instruction *instr)
 //	by controlling the contents of memory, the translation table,
 //	and the register set.
 //----------------------------------------------------------------------
+// 191019[J]: 重要的函式!
 void
 Machine::OneInstruction(Instruction *instr)
 {
@@ -669,9 +678,9 @@ Machine::OneInstruction(Instruction *instr)
 
 	break;
 
-      case OP_SYSCALL:
+      case OP_SYSCALL: // 191019[J]: !!!!!!!!
 	DEBUG(dbgTraCode, "In Machine::OneInstruction, RaiseException(SyscallException, 0), " << kernel->stats->totalTicks);
-	RaiseException(SyscallException, 0);
+	RaiseException(SyscallException, 0); // 191019[J]: !!!!!!
 	return;
 
       case OP_XOR:

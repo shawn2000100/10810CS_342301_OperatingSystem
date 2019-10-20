@@ -140,6 +140,7 @@ Interrupt::SetLevel(IntStatus now)
 //		interrupts are re-enabled
 //		a user instruction is executed
 //----------------------------------------------------------------------
+// 191019[J]: 這個OneTick應該就是CPU跑一個Clock的意思
 void
 Interrupt::OneTick()
 {
@@ -285,14 +286,15 @@ Interrupt::CloseFile(OpenFileId id)
 //
 //	Implementation: just put it on a sorted list.
 //
-//	NOTE: the Nachos kernel should not call this routine directly.
-//	Instead, it is only called by the hardware device simulators.
+//	**NOTE: the Nachos kernel should not call this routine directly.
+//	Instead, it is only called by the hardware device simulators.**
 //
 //	"toCall" is the object to call when the interrupt occurs
 //	"fromNow" is how far in the future (in simulated time) the 
 //		 interrupt is to occur
 //	"type" is the hardware device that generated the interrupt
 //----------------------------------------------------------------------
+// 191019[J]: 在這邊算好Interruput何時要執行(fromNow sec)，然後在PendingInterrupt List裡面新增一個待執行的Interrupt
 void
 Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
 {
@@ -310,6 +312,8 @@ Interrupt::Schedule(CallBackObj *toCall, int fromNow, IntType type)
 // 	Check if any interrupts are scheduled to occur, and if so, 
 //	fire them off.
 //
+// // 191019[J]: Interrupt的執行是如何實作的
+//
 // Returns:
 //	TRUE, if we fired off any interrupt handlers
 // Params:
@@ -324,13 +328,16 @@ Interrupt::CheckIfDue(bool advanceClock)
     Statistics *stats = kernel->stats;
 
     ASSERT(level == IntOff);		// interrupts need to be disabled,
-					// to invoke an interrupt handler
+    
+    // to invoke an interrupt handler
     if (debug->IsEnabled(dbgInt)) {
-	DumpState();
+    DumpState();
     }
+    
     if (pending->IsEmpty()) {   	// no pending interrupts
-	return FALSE;	
-    }		
+      return FALSE;	
+    }	
+    	
     next = pending->Front();
 
     if (next->when > stats->totalTicks) {
@@ -338,10 +345,10 @@ Interrupt::CheckIfDue(bool advanceClock)
             return FALSE;
         }
         else {      		// advance the clock to next interrupt
-	    stats->idleTicks += (next->when - stats->totalTicks);
-	    stats->totalTicks = next->when;
-	    // UDelay(1000L); // rcgood - to stop nachos from spinning.
-	}
+	        stats->idleTicks += (next->when - stats->totalTicks);
+	        stats->totalTicks = next->when;
+       // UDelay(1000L); // rcgood - to stop nachos from spinning.
+	      }
     }
 
     DEBUG(dbgInt, "Invoking interrupt handler for the ");
@@ -350,16 +357,22 @@ Interrupt::CheckIfDue(bool advanceClock)
     if (kernel->machine != NULL) {
     	kernel->machine->DelayedLoad(0, 0);
     }
-
+    
+    
     inHandler = TRUE;
+    
     do {
         next = pending->RemoveFront();    // pull interrupt off list // 1910010[J]: Pull interrupt from pending queue
-		DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, into callOnInterrupt->CallBack, " << stats->totalTicks);
+		
+    DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, into callOnInterrupt->CallBack, " << stats->totalTicks);
+        
+        // 191019[J]: 
         next->callOnInterrupt->CallBack();// call the interrupt handler // 1910010[J]: Call interrupt service routine (callback function)
-		DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, return from callOnInterrupt->CallBack, " << stats->totalTicks);
-	delete next;
-    } while (!pending->IsEmpty() 
-    		&& (pending->Front()->when <= stats->totalTicks));
+		
+    DEBUG(dbgTraCode, "In Interrupt::CheckIfDue, return from callOnInterrupt->CallBack, " << stats->totalTicks);
+	      delete next;
+    } while ( !pending->IsEmpty() && (pending->Front()->when <= stats->totalTicks) );
+    
     inHandler = FALSE;
     return TRUE;
 }

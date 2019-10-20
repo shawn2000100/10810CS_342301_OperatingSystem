@@ -1,7 +1,3 @@
-# Copyright (c) 1992-1996 The Regents of the University of California.
-# All rights reserved.  See copyright.h for copyright notice and limitation 
-# of liability and disclaimer of warranty provisions.
-#
 # This is a GNU Makefile.  It must be used with the GNU make program.
 # At UW, the GNU make program is /software/gnu/bin/make.
 # In many other places it is known as "gmake".
@@ -9,6 +5,9 @@
 # search path, so that you will be using GNU make when you type "make".
 #
 # About this Makefile:
+#
+# // 191019[J]: 看起來這個MAKEFILE會把所有的CODE編譯成obj code，然後送到這個資料夾後統一合併成nachos binary code(執行檔)
+#
 # --------------------
 #
 #  This Makefile is used to build the Nachos system, which includes
@@ -84,7 +83,7 @@
 #
 # How to Re-build Nachos after you have changed the code:
 #--------------------------------------------------------
-#
+# // 191019[J]: 這段其實可以稍微看一下
 #     - The Nachos source code is located in the code subdirectories:
 #	  threads, userprog, filesys, network, and lib.  You may
 #         change the files in any of these directories, and you can
@@ -177,7 +176,7 @@
 #
 ################################################################
 #  READ THIS:   CONFIGURING NACHOS
-#
+# // 191019[J]: MP4的時候可能需要改到這邊
 # Change DEFINES (below) to
 #   DEFINES = -DUSE_TLB -DFILESYS_STUB
 # if you want the simulated machine to use its TLB
@@ -192,7 +191,7 @@
 # and eventually will not require the symbol definition
 ################################################################
 DEFINES =  -DFILESYS_STUB -DRDATA -DSIM_FIX
-
+# // 191019[J]: MP4的時候可能需要改到這邊
 
 #####################################################################
 #
@@ -215,7 +214,7 @@ INCPATH = -I../network -I../filesys -I../userprog -I../threads -I../machine -I..
 
 PROGRAM = nachos
 
-#
+# // 191019[J]: 要新增任何檔案的話需要改到這邊
 # Edit these lists as if you add files to the source directories.
 # See the instructions at the top of the file for more information.
 #
@@ -319,6 +318,7 @@ NETWORK_O = post.o
 #  You probably don't want to change anything below this point in
 #  the file unless you are comfortable with GNU make and know what
 #  you are doing...
+# // 191019[J]: 下面不用動了
 ##################################################################
 
 THREAD_S = ../threads/switch.s
