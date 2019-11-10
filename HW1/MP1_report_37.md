@@ -875,4 +875,4 @@ NachOS的程式碼非常多，除了要了解程式碼在寫甚麼以外，還�
 [15.] [C語言assert的用法](https://www.itread01.com/content/1545290502.html)
 [16.] [Linux 系統程式設計 - fd 及 open()、close() 系統呼叫](https://blog.jaycetyle.com/2018/12/linux-fd-open-close/)
 [17.] [Why do we use .globl main in MIPS assembly language?](https://stackoverflow.com/questions/33062405/why-do-we-use-globl-main-in-mips-assembly-language)
-[18. ] [C語言的條件編譯#if， #elif， #else， #endif、#ifdef， #ifndef](https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/81826/)
+[18.] [C語言的條件編譯#if， #elif， #else， #endif、#ifdef， #ifndef](https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/81826/)
