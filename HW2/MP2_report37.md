@@ -8,29 +8,212 @@
 
 | 工作項目   | 分工            |
 | ---------- | --------------- |
-| Trace Code | 陳子潔 & 徐迺茜 |
+| 報告撰寫 (Part I & II) | 陳子潔 |
 | 功能實作   | 陳子潔          |
 | 功能測試   | 徐迺茜          |
-| 問題回答   | 陳子潔 & 徐迺茜 |
+| 報告撰寫 (Part III)   | 陳子潔 & 徐迺茜 |
 
 ---
 
 ## 1. Trace code 
-* Starting from “threads/kernel.cc, Kernel::ExecAll()”, “threads/thread.cc, thread::Sleep”, until “machine/mipssim.cc, Machine::Run()” is called for executing the first instruction from the user program
-
-
+* Starting from “threads/kernel.cc **Kernel::ExecAll()**”, “threads/thread.cc **thread::Sleep**”, until “machine/mipssim.cc **Machine::Run()**” is called for executing the first instruction from the user program
 
 ### threads/kernel.cc  Kernel::ExecAll()
+* 首先簡單摘錄Thread在NachOS裡面的資料結構
+```C=
+class Thread {
+  public:
+    Thread(char* debugName, int threadID);
+    // Make thread run (*func)(arg)
+    void Fork(VoidFunctionPtr func, void *arg);
+    // Relinquish the CPU if any other thread is runnable
+    void Yield();  	
+    // Put the thread to sleep and relinquish the processor
+    void Sleep(bool finishing); 
+    // Startup code for the thread
+    void Begin();			
+    // The thread is done executing
+    void Finish();  		
+    void setStatus(ThreadStatus st) { status = st; }
+    ThreadStatus getStatus() { return (status); }
+    char* getName() { return (name); }  
+    int getID() { return (ID); }
+    // save user-level register state
+    void SaveUserState();		
+    // restore user-level register state
+    void RestoreUserState();	
+    // User code this thread is running.
+    AddrSpace *space;			
+};
+  
+  private:
+    // the current stack pointer
+    int *stackTop;			 
+    // all registers except for stackTop 
+    // J: 這邊就是Kernel Registers States的樣子
+    void *machineState[MachineStateSize];  
+    int *stack;		
+    ThreadStatus status;	// ready, running or blocked
+    char* name;
+    int   ID;
+    // Allocate a stack for thread. Used internally by Fork()
+    void StackAllocate(VoidFunctionPtr func, void *arg); 
+    // user-level CPU register state
+    int userRegisters[NumTotalRegs];	
+```
+* 從這邊大概可以知道NachOS的Thread執行有以下幾點要注意:
+    1. A thread running a user program actually has **two** sets of CPU registers -- one for its state while executing **user code**, one for its state while executing **kernel code**.
+    2. 每個Thread除了有自己的Register Sets外，也有AddrSpace，其中宣告了TranslationEntry (類似VMM的角色)，而本次作業的pageTable也是在AddrSpace中實作
+    3. 一個Thread要執行時 (暫不考慮Context Switch)，須完成以下幾個程序:
+        1. InitRegisters();		// set the initial register values
+        2. RestoreState();		// load page table register
+        3. kernel->machine->Run();		// jump to the user progam
+
+    * (參見AddrSpace::Execute(char* fileName) )
+
+---
+
+* 接著從Exec這個子函數開始追蹤
+* 簡單來說，要執行一個程式，依序:
+    1. 創造一條Thread
+    2. 賦予他一個定址空間 (AddrSpace)
+    3. 透過Fork載入真正要執行的程式碼
+    4. 將記錄Thread數量的變數+1
+```C=
+int Kernel::Exec(char* name)
+{
+	t[threadNum] = new Thread(name, threadNum);
+	t[threadNum]->space = new AddrSpace();
+	t[threadNum]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[threadNum]);
+	threadNum++;
+
+	return threadNum-1;
+```
+
+---
+
+* 此外，觀察傳入Fork的(FuncPtr) &ForkExecute
+* 可發現此函式會呼叫addrspace.cc裡面的Load函式，將要執行的程式載入Memory中
+```C=
+void ForkExecute(Thread *t)
+{
+	if ( !t->space->Load(t->getName()) ) {
+    	return;             // executable not found
+    }
+	
+    t->space->Execute(t->getName());
+}
+```
+
+* 最後呼叫addrspace.c::Execute
+* 這邊會將目前執行緒的定址空間與caller link起來
+* 接著初始化user registers
+* 並載入這個程式所對應的page table
+* 呼叫machine-Run來模擬程式執行
+```C=
+void 
+AddrSpace::Execute(char* fileName) 
+{
+
+    kernel->currentThread->space = this;
+
+    this->InitRegisters();	// set the initial register values
+    this->RestoreState();	// load page table register
+
+    kernel->machine->Run();	// jump to the user progam
+
+    ASSERTNOTREACHED();	// machine->Run never returns;
+				// the address space exits
+				// by doing the syscall "exit"
+}
+```
 
 
+---
 
+* 而我們再深入追蹤Fork可以發現，這邊又做了幾件事情:
+    1. Allocate a stack
+    2. Initialize the stack so that a call to SWITCH will cause it to run the procedure
+    3. Put the thread on the ready queue
+* StackAllocate裡面又更詳細的初始化了各種Kernel Registers (machineState)
+```C=
+void 
+Thread::Fork(VoidFunctionPtr func, void *arg)
+{
+    Interrupt *interrupt = kernel->interrupt;
+    Scheduler *scheduler = kernel->scheduler;
+    IntStatus oldLevel;
+
+    StackAllocate(func, arg);
+
+    oldLevel = interrupt->SetLevel(IntOff);
+    scheduler->ReadyToRun(this);	
+    (void) interrupt->SetLevel(oldLevel);
+}    
+```
+
+---
+
+* 於是到這邊，我們可以發現ExecAll就是要Main Thread(Kernel)依序去執行(Exec)所有要執行的程式(Thread)
+```C=
+void Kernel::ExecAll()
+{
+	for (int i=1;i<=execfileNum;i++) {
+		int a = Exec(execfile[i]);
+	}
+	currentThread->Finish();
+}
+```
+* 執行完所有的程式(Thread)後，呼叫Finish準備來釋放Thread的空間，這邊要注意:
+    * NOTE: we can't immediately de-allocate the thread data structure or the execution stack, 
+    * because we're still running in the thread and we're still on the stack!  
+    * Instead, we tell the scheduler to call the destructor, once it is running in the context of a different thread.
+* 所以其實Finish裡面又會呼叫Sleep()，來Block住目前的Thread
+* 接著下一條Thread(不重要)會將剛剛執行完的Thread De-Allocate掉
 
 ### threads/thread.cc  thread::Sleep
+* 承上，Finish在呼叫Thread的時候其實已經先Disable Interrupt了
+* 迴圈判斷kernel->scheduler->FindNextToRun() (是否還有下一條Thread要跑)
+    * 若有，則繼續往下跑(有可能只是要De-Allocate上一條Thread而故意創造的而已)
+    * 若無，進入Idle Mode，此時會判斷是否沒有任何Interrupt跟Thread要執行了，若無，整個NachOS運作結束(Halt)。
+```C=
+void
+Thread::Sleep (bool finishing)
+{
+    Thread *nextThread;
+    
+    ASSERT(this == kernel->currentThread);
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
+    
+    status = BLOCKED;
 
-
+    while ((nextThread = kernel->scheduler->FindNextToRun()) == NULL) {
+		kernel->interrupt->Idle();	
+	}    
+    // returns when it's time for us to run
+    kernel->scheduler->Run(nextThread, finishing); 
+}
+```
 
 ### machine/mipssim.cc  Machine::Run()
+* 這邊做一點簡化，其實就是在一行一行的模擬程式(Thread)執行的解碼過程
+* instr就是User Program的某一行程式碼
+* OneTick就是模擬CPU Clock往前跑的情形，通常一條指令假設會讓系統前進一個Clock
+* 提醒: User Program理所當然的是執行在UserMode上，有需要用到Syscall才會轉到Kernel Mode (參見MP1)
+```C=
+void
+Machine::Run()
+{
+    Instruction *instr = new Instruction;  // storage for decoded instruction
 
+    kernel->interrupt->setStatus(UserMode);
+    
+    for (;;) {
+      OneInstruction(instr);
+      kernel->interrupt->OneTick();
+   }
+}
+```
 
 
 
@@ -77,8 +260,6 @@
 
 
 ### When and how does a thread get added into the ReadyToRun queue of Nachos CPU scheduler?
-ff
-55
 
 
 ----
