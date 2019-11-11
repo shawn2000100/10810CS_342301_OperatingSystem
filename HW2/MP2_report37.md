@@ -8,6 +8,7 @@
 
 | 工作項目   | 分工            |
 | ---------- | --------------- |
+| Trace Code | 陳子潔 & 徐迺茜 |
 | 報告撰寫 (Part I & II) | 陳子潔 |
 | 功能實作   | 陳子潔          |
 | 功能測試   | 徐迺茜          |
@@ -82,12 +83,13 @@ class Thread {
 ```C=
 int Kernel::Exec(char* name)
 {
-	t[threadNum] = new Thread(name, threadNum);
-	t[threadNum]->space = new AddrSpace();
-	t[threadNum]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[threadNum]);
-	threadNum++;
+    t[threadNum] = new Thread(name, threadNum);
+    t[threadNum]->space = new AddrSpace();
+    t[threadNum]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[threadNum]);
+    threadNum++;
 
-	return threadNum-1;
+    return threadNum-1;
+}
 ```
 
 ---
@@ -214,7 +216,16 @@ Machine::Run()
    }
 }
 ```
-
+* 搭配前面的Kernel::ExecAll()追蹤過程，我們可大致整理出NachOS要執行一個程式的流程:
+    1. New一個Thread，並做簡單初始化
+    2. 再New一個AddrSpace給此Thread
+    3. Thread呼叫Fork，最終目的是將欲執行的程式載入進去Thread
+        1. Fork接收到funcPtr(到時候要執行的程式)
+        2. 先做StackAllocate，初始化一些Thread的Stack，透過machineState[InitialPCState] = (void*)func;，讓原先的funcPtr成為未來ProgramCounter要執行的程式，
+        3. 此時Thread大致初始化完畢，將Interrupt Disable
+        4. 透過scheduler->ReadyToRun(this);將剛剛的Thread放入Ready Queue，將來準備讓CPU執行
+        5. 重新打開Interrupt
+    4. CPU scheduler未來會從Ready Queue中Load準備要執行的Thread，並讀取ProgramCounter的值
 
 
 ---
@@ -225,41 +236,171 @@ Machine::Run()
 ![](https://i.imgur.com/o0anKcl.jpg)
 
 
+* 本次作業的提示
+> Hint: The following files “may” be modified:
+> userprog/addrspace.* 
+> threads/kernel.
+
 ### addrspace.h
+* 根據提示，我們首先觀察addrspace.h
+```c=
+#define UserStackSize		1024 	
+class AddrSpace {
+  public:
+    AddrSpace();			
+    ~AddrSpace();		
+    bool Load(char *fileName);		
+    void Execute(char *fileName);    
+    void SaveState();			
+    void RestoreState(); 
+  ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
+
+  private:
+    TranslationEntry *pageTable;
+    unsigned int numPages;	
+    void InitRegisters();	
+};
+```
+* 可以發現AddrSpace實作了將Program Load進Memory，並且Execute的功能
+* TranslationEntry 可以拿來操作程式的PageTable
+* 我們在Addrsapce這個Class裡面多宣告一個共享變數，紀錄被使用過的Frame(PhysicalPages)
+* > static bool usedPhyPage[NumPhysPages];
 
 ### addrspace.c
-
-### kernel.h
-
-### kernel.c
-
-
+* 將著來到addrspace.c裡面的Load函式
+* 我們在Load裡面新增以下幾行，讓剛剛宣告的usedPhyPage派上用場
+* 順便設置一下valid, use, dirty...等Virtual Memory的紀錄值
+```C=
+    pageTable = new TranslationEntry[numPages];
+    for(unsigned int i = 0, j = 0; i < numPages; i++) {
+        pageTable[i].virtualPage = i;
+        while(j < NumPhysPages && AddrSpace::usedPhyPage[j] == true)
+            j++;
+        AddrSpace::usedPhyPage[j] = true;
+        pageTable[i].physicalPage = j;
+        pageTable[i].valid = true;
+        pageTable[i].use = false;
+        pageTable[i].dirty = false;
+        pageTable[i].readOnly = false;
+    }
+```
 
 ---
 
+```C=
+executable->ReadAt(
+&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage
+* PageSize + (noffH.code.virtualAddr%PageSize)]), 
+noffH.code.size, noffH.code.inFileAddr);
+    
+executable->ReadAt(
+&(kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage 
+* PageSize + (noffH.code.virtualAddr%PageSize)]),
+noffH.initData.size, noffH.initData.inFileAddr);
+
+executable->ReadAt(
+&(kernel->machine->mainMemory[pageTable[noffH.readonlyData.virtualAddr/PageSize].physicalPage 
+* PageSize + (noffH.code.virtualAddr%PageSize)]), 
+noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
+```
+* 接著我們改變一下noffH.initData、noffH.code、noffH.readonlyData所讀取到的Memory地址 (**因為原先並未修改到這邊，所以所有程式都讀取到同一頁Page，共享到不該共享的變數了!**)
+* 簡而言之，修正過後的Memory Address存取位置公式為: page base + page offset
+
+### kernel.h & kernel.c
+* 根據題目要求: You must put the data structure recording used physical memory in kernel.h / kernel.c
+* 不過我不確定是要把整個AddrSpace搬到Kernel.h去，還是只要把usedPhyPage般過去就好了，故本次作業就沒修改到這個檔案了...
+
+---
 
 ## 3. Explain how NachOS creates a thread(process), load it into memory and place it into scheduling queue as requested in Part II-1 Your explanation on the functions along the code path should at least cover answer for the questions below
 
+---
 
-### How Nachos allocates the memory space for new thread(process)?
+### How Nachos initializes the memory content of a thread(process), including loading the user binary code in the memory? & How Nachos allocates the memory space for new thread(process)?
 
+我們可大致整理出NachOS要執行一個程式的流程:
 
-### How Nachos initializes the memory content of a thread(process), including loading the user binary code in the memory?
+1. New一個Thread，並做簡單初始化
 
+3. 再New一個AddrSpace給此Thread
+    * addrspace的建構子當中會使用bzero（）來清除Memory
+
+4. Thread呼叫Fork，最終目的是將欲執行的程式載入進去Thread
+    1. Fork接收到ForkExecute的funcPtr(到時候要執行的程式)
+    3. 接著做StackAllocate，初始化一些Thread的Stack，透過machineState[InitialPCState] = (void*)func;，讓原先的funcPtr成為未來ProgramCounter要執行的程式
+    4. 此時Thread大致初始化完畢，將Interrupt Disable
+    5. 透過scheduler->ReadyToRun(this);將剛剛的Thread放入Ready Queue，將來準備讓CPU執行
+    6. 重新打開Interrupt
+
+5. CPU scheduler未來會從Ready Queue中Load準備要執行的Thread，並讀取ProgramCounter的值
+
+---
 
 ### How Nachos creates and manages the page table? 
-
+* translate.h裡面會定義TranslationEntry，這個Class有一點類似VMM的角色，據說也能拿來當TLB用
+* 接著在addrspace.h當中會定義TranslationEntry *pageTable
+* 未來addrspace.c裡面實作Load函式的時候，可以操作pageTable做一些Virtual Memory相關的處理及轉譯
 
 ### How Nachos translates address? 
-
+在addrspace.h與machine.h皆分別定義了Translate
+> ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
+> ExceptionType Translate(int virtAddr, int* physAddr, int size, bool writing)
+* 由於C++支援function overloading，而我用grep -nr "Translate"查看的結果，認為應該主要還是使用translate.c裡面所實作的Translate來做address translate
+* 至於Transalte函式內部所做的事情基本上就是判斷這個程式所使用的Page是否合法、size是否超過...等
 
 ### How Nachos initializes the machine status (registers, etc) before running a thread(process) 
-
+* machineStates主要都是在thread.c裡面的建構子中初始化的
+* 以後在Fork的時候也會呼叫StackAllocate做一些mahineStates的設定
 
 ### Which object in Nachos acts the role of process control block
+* 我們查看Thread.h，並觀看註解，可以發現這個Class長的很像process control block
+```C=
+// The following class defines a "thread control block" 
+// -- which represents a single thread of execution.
+//
+//  Every thread has:
+//     an execution stack for activation records ("stackTop" and "stack")
+//     space to save CPU registers while not running ("machineState")
+//     a "status" (running/ready/blocked)
+//    
+//  Some threads also belong to a user address space; threads
+//  that only run in the kernel have a NULL address space.
 
+class Thread {
+  private:
+    int *stackTop;
+    void *machineState[MachineStateSize]; 
+
+  public:
+    Thread(char* debugName, int threadID);
+    ~Thread(); 
+					
+    void setStatus(ThreadStatus st) { status = st; }
+    ThreadStatus getStatus() { return (status); }
+	char* getName() { return (name); }  
+  	int getID() { return (ID); }
+
+  private:
+    int *stack;
+    ThreadStatus status;	
+    char* name;
+    int   ID;
+    void StackAllocate(VoidFunctionPtr func, void *arg); 
+
+// A thread running a user program actually has **two** sets of CPU registers
+// one for its state while executing **user code**, one for its state 
+// while executing **kernel code**.
+    int userRegisters[NumTotalRegs];	
+  public:
+    void SaveUserState();		
+    void RestoreUserState();	
+    AddrSpace *space;			
+};
+```
 
 ### When and how does a thread get added into the ReadyToRun queue of Nachos CPU scheduler?
+* thread.c的Fork中，會呼叫scheduler->ReadyToRun(this)
+* 此行會將已經分配好資源的Thread放入Ready Queue，以供未來CPU排班執行
 
 
 ----
