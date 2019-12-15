@@ -27,7 +27,7 @@
 * 主程式(main) **Bootstrap** the NachOS kernel
     * 主程式接收命令列參數 (int argc, **argv)，並利用strcmp做剖析
     * 做一些簡單的初始化 (DEBUG, XXXTest, XXXFlag...,etc)
-    * 正式載入(宣告?)Kernel，並做許多初始化 (詳細參見Kernel.c)
+    * 正式載入(宣告?)Kernel，並做許多初始化
 
         ```javascript=
         .
@@ -38,8 +38,7 @@
         kernel->ExecAll();
         .
         ```
-* Kernel初始化完成，main.c接續執行 **Kernelkernel->ExecAll();**
-
+        
 ### Kernel::ExecAll()
 ```javascript=
 void Kernel::ExecAll()
@@ -52,7 +51,7 @@ void Kernel::ExecAll()
     currentThread->Finish(); 
 }
 ```
-1. 此函數會依序執行 (**Exec**) 每一個應該執行的檔案
+1. 此函數會依序執行 (**Exec**) 每一個檔案
     * 而"execfile"在kernel初始化的時候就會剖析終端機參數來決定:
         ```javascript=
         else if (strcmp(argv[i], "-e") == 0) {
@@ -116,7 +115,6 @@ int Kernel::Exec(char* name)
         * **補充:** 新的Thread在拿到控制權後大致運作如下 (借助**SWITCH.s**的幫助來執行以下動作):
             1. Thread->Begin( )
             2. ForkExecute( )
-                * 回憶: Program Counter在何時存入ForkExecute的func pointer?
                 * Machine抓取Program Counter存放的指令address來Decode
                 * ForkExecute又會大致做兩件事情:
                     1. t->space->Load(t->getName())
@@ -1137,7 +1135,7 @@ Scheduler::Run (Thread *nextThread, bool finishing)
     #define StartupPC       %ecx
     #endif
     ```
-    * 這邊宣告一些register的位置    
+    * 這邊宣告一些register的位置，為了讓switch.s取用
     
 2. **thread.h** 外部宣告(extern)
     ```c=
@@ -1146,6 +1144,7 @@ Scheduler::Run (Thread *nextThread, bool finishing)
         void SWITCH(Thread *oldThread, Thread *newThread);
     }
     ```
+    * scheduler::Run裡面會呼叫這邊定義的SWITCH
     * 透過extern的宣告以及compiler的輔助，使得x86組語能夠與C語言互相呼叫
 
 3. **switch.s** 實作細節
@@ -1208,39 +1207,57 @@ Scheduler::Run (Thread *nextThread, bool finishing)
             ret
     #endif // x86
     ```
-解釋:
-```javascript=
-void Thread::StackAllocate (VoidFunctionPtr func, void *arg)
-{
-    ...
-#ifdef x86
-    stackTop = stack + StackSize - 4;
-    *(--stackTop) = (int) ThreadRoot;
-    *stack = STACK_FENCEPOST;
-    machineState[PCState] = (void*)ThreadRoot;
-    machineState[StartupPCState] = (void*)ThreadBegin;
-    machineState[InitialPCState] = (void*)func;
-    machineState[InitialArgState] = (void*)arg;
-    machineState[WhenDonePCState] = (void*)ThreadFinish;
-#endif
-}
-```
-* 在C語言的StackAllocate中，我們已經將未來要執行的函式的address放進Host CPU所對應的registers裡面了
-* 於是我們在組語中所看到的register value分別代表:
-    ```C=
-    ecx     points to startup function (interrupt enable) 
-    edx     contains inital argument to thread function
-    esi     points to thread function
-    edi     point to Thread::Finish()
-    ```
-* 我們在scheduler::Run( )中呼叫SWITCH:
-    * 剛切換到組語時，stack內存放的值如下:
-        ```c=
-        **      8(esp)  ->    thread *t2
-        **      4(esp)  ->    thread *t1
-        **      0(esp)  ->    return address
-        ```
 
+    解釋:
+    * 在C語言的StackAllocate中，我們已經將未來要執行的函式的address放進Host CPU所對應的registers裡面了
+        * 注意，這邊的PCState裡面存的是ThreadRoot的function pointer
+        ```javascript=
+        void Thread::StackAllocate (VoidFunctionPtr func, void *arg)
+        {
+            ...
+        #ifdef x86
+            machineState[PCState] = (void*)ThreadRoot;
+            machineState[StartupPCState] = (void*)ThreadBegin;
+            machineState[InitialPCState] = (void*)func;
+            machineState[InitialArgState] = (void*)arg;
+            machineState[WhenDonePCState] = (void*)ThreadFinish;
+        #endif
+        }
+        ```
+    * 於是我們在組語中所看到的register value分別代表:
+        * ecx: points to startup function 
+            * 對應到C的(void*)ThreadBegin (interrupt enable)
+            * 裡面會做kernel->interrupt->Enable();
+        * edx: contains inital argument to thread function
+            * 對應到C的(void*)arg;
+        * esi: points to thread function
+            * 對應到C的(void*)func (其實就是ForkExecute))
+        * edi: point to Thread::Finish()
+            * 對應到C的(void*)ThreadFinish
+        * **esp** (組語執行到最後，esp裡面會存放新Thread的PCState的值)
+            * 對應到C的(void*)ThreadRoot;
+        
+    * 我們在scheduler::Run( )中呼叫SWITCH:
+        * 剛切換到組語時，stack內存放的值如下:
+            ```c=
+            **      8(esp)  ->    thread *t2
+            **      4(esp)  ->    thread *t1
+            **      0(esp)  ->    return address
+            ```
+    * 接著做的事情可簡單分為以下
+        1. 將 t1 (舊thread) 的所有相關 registers 保存起來 (需配置一塊空間於Memory)
+        2. 將 t2 (新thread) 的所有相關 registers從Memory裡面的對應位置 Load 進 CPU registers裡面
+            * 回憶: Switch.h所定義的address offset
+        3. ret
+            * set CPU program counter to the memory address pointed by the value of register **esp**
+            * 將來程式會抓取 esp 裡面所存放的位置來執行 (ThreadRoot)
+            * ThreadRoot主要作三件事情:
+                1. call    *StartupPC
+                    * Thread::ThreadBegin( )
+                2. call    *InitialPC
+                    * Kernel::ForkExecute( )
+                3. call    *WhenDonePC
+                    * Thread::ThreadFinish ( )
 
 
 
@@ -1343,63 +1360,360 @@ Machine::Run()就是在模擬MIPS架構CPU的每一條指令每一個Tick的執�
 
 
 ## Implementation
-----
-## 2-1. Implement a multilevel feedback queue scheduler with aging mechanism
+## 2-1 Implement a multilevel feedback queue
+* 為了完成這次的MultiLevel Feedback Queue，於**Thread**結構、**Alarm**以及**Scheduler**皆需要做更動
 
+### Thread.h
+* 宣告幾個排班用的變數，以及set & get Method
+```javascript=
+Public:
+    void setBurstTime(int t) {burstTime = t;} 
+    void setWaitingTime(int t){waitingTime = t;}
+    void setExecutionTime(int t){executionTime = t;}
+    void setPriority(int p){priority = p;}
+    void setL3Time(int t){L3Time = t;}
+    int getBurstTime(){return (burstTime);} 
+    int getWaitingTime(){return (waitingTime);}
+    int getExecutionTime(){return (executionTime);}
+    int getPriority(){return (priority);}
+    int getL3Time(){return (L3Time);}
+Private:
+    int burstTime;
+    int waitingTime;
+    int executionTime;
+    int L3Time;
+    int priority;
+```
 
-----
-## 2-2. Add a command line argument "-ep" for nachos to initialize priority of process
+### Thread.c
+按照作業中的提示:
+* Only update approximate burst time ti (include both user and kernel mode) when process change its state **from running to waiting.** 
+* 推測應該是更改Sleep這裡啦...
+* 更新時間的公式應該是這樣吧... 照著SPEC亂刻的...
+```javascript=
+void
+Thread::Sleep (bool finishing)
+{
+    Thread *nextThread;
+    
+    ASSERT(this == kernel->currentThread);
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
+    
+    status = BLOCKED;
 
-----
-## 2-3. Add a debugging flag 'z' and use the DEBUG('z', expr) macro (defined in debug.h) to print following messages. Replace {...} to the corresponding value.
-
-#### (a) Whenever a process is inserted into a queue:
-
-#### (b) Whenever a process is removed from a queue:
-
-#### (c\) Whenever a process changes its scheduling priority:
-
-#### (d) Whenever a process updates its approximate burst time:
-
-#### (e) Whenever a context switch occurs:
-
-
-----
-##### Rules
-* **MUST** follow the following rules in implementation:
-  1. Do not modify any code under machine folder (**except Instructions 2. below**).
-  2. Do NOT call the **Interrupt::Schedule()** function from your implemented code. 
-  3. Only update **approximate burst time** **ti** (include both user and kernel mode) when process change its state from running to waiting. 
-  In case of running to ready (interrupted), its **CPU burst time** **T** must keep accumulating after it resumes running.
-  4. The operations and rescheduling events of **aging can be delayed until the timer alarm is triggered** (the next 100 ticks timer interval).
-##### SPEC
-* (a) **3 levels of queues** 
-    * L1 is the highest level queue
-    * L3 is the lowest level queue
-
-* (b) **All processes** must have a valid scheduling **priority** between **0 to 149**. 
-    * 149 is the highest priority
-    * 0 is the lowest priority.
-
-* (c\) A process with **priority between** 
-    * 0~49 is in L3 queue. 
-    * 50~99 is in L2 queue. 
-    * 100~149 is in L1 queue.
-
-* (d) **L1 queue** uses **preemptive SJF**. 
-    * If current thread has the **lowest approximate burst time**, it should not be preempted by the threads in ready queue. The **job execution time is approximated using the equation**:
+    int prevBurstTime = this->getBurstTime();
+    int newBurstTime = 0.5*prevBurstTime + 0.5*this->getExecutionTime();
+    this->setBurstTime(newBurstTime);
+    int diff = newBurstTime - prevBurstTime;
+ 
+    while ((nextThread = kernel->scheduler->FindNextToRun()) == NULL) {
+        kernel->interrupt->Idle();
+    }    
      
-        * $ti = 0.5 * T + 0.5 * ti-1(type double)$
+    kernel->scheduler->Run(nextThread, finishing); 
+}
+```
 
-* (e) **L2 queue** uses **non-preemptive priority**. 
-    * If current thread has the **highest priority**, it should not be preempted by the threads in ready queue.
+### scheduler.h
+* 新增一個updatePriority函式 (為了做Aging)以及三個ReadyQueue
+```javascript=
+Public:
+    void updatePriority();
+private:
+    SortedList<Thread *> *L1ReadyList;  
+    SortedList<Thread *> *L2ReadyList;  
+    List<Thread *> *L3ReadyList;  
+```
 
-* (f) **L3 queue** uses **round-robin** with time quantum **100 ticks**.
+### scheduler.c
+* 新增兩個compare function (可參考 interrupt 裡面的 compare 寫法)
+* L3因為是用RR排班，所以不用Compare，按照Time Quantum輪流就好了
+```javascript=
+static int 
+compareL1(Thread* t1, Thread* t2)
+{
+    if ( t1->getBurstTime() > t2->getBurstTime() ) return 1;
+    else if ( t1->getBurstTime() < t2->getBurstTime() ) return -1;
+    else return t1->getID() < t2->getID() ? -1 : 1;
+    
+    return 0;
+}
 
-* (g) An **aging mechanism must be implemented**
-    * that the priority of a process is increased by **10** after waiting for more than **1500 ticks** 
-    * (The operations of **preemption** and **priority** updating can be delayed until the **next timer alarm** interval).
+static int 
+compareL2(Thread* t1, Thread* t2)
+{
+    if ( t1->getPriority() > t2->getPriority() )  return -1;
+    else if( t1->getPriority() < t2->getPriority() ) return 1;
+    else return t1->getID() < t2->getID() ? -1 : 1;
+    
+    return 0;
+}
+```
 
+建構子 & 解構子
+```javascript=
+Scheduler::Scheduler()
+{ 
+    L1ReadyList = new SortedList<Thread *>(compareL1);
+    L2ReadyList = new SortedList<Thread *>(compareL2);
+    L3ReadyList = new List<Thread *>;
+    
+    toBeDestroyed = NULL;
+} 
+
+Scheduler::~Scheduler()
+{ 
+    delete L1ReadyList;
+    delete L2ReadyList;
+    delete L3ReadyList;
+} 
+```
+
+實作updatePriority( )
+* 這邊簡單來說就是利用 **ListIterator** (定義於list.h) 來遍歷ready queue裡面的全部Thread，並更新waiting time
+    * 這邊我只在Timer Interrupt (每100ticks) 之間update waiting time
+    * 判斷更新後的waiting time是否大於1500，並做Aging
+    * 這邊要注意 Priority 需控制在 0 ~ 149之間
+        * 故新增一個 if 條件式做判斷
+```javascript=
+void Scheduler::updatePriority()
+{  
+ListIterator<Thread *> *iter1 = new ListIterator<Thread *>(L1ReadyList);
+ListIterator<Thread *> *iter2 = new ListIterator<Thread *>(L2ReadyList);
+ListIterator<Thread *> *iter3 = new ListIterator<Thread *>(L3ReadyList);
+
+Statistics *stats = kernel->stats;
+int oldPriority;
+int newPriority;
+// L1
+for( ; !iter1->IsDone(); iter1->Next() ){
+    ASSERT( iter1->Item()->getStatus() == READY);
+
+iter1->Item()->setWaitingTime(iter1->Item()->getWaitingTime()+TimerTicks);
+    if(iter1->Item()->getWaitingTime() >= 1500 
+    && iter1->Item()->getID() > 0 ){
+        
+        oldPriority = iter1->Item()->getPriority();
+        newPriority = oldPriority + 10;
+        if (newPriority > 149){
+            newPriority = 149;
+        }
+        iter1->Item()->setPriority(newPriority);
+        iter1->Item()->setWaitingTime(0);
+    }
+}
+// L2
+for( ; !iter2->IsDone(); iter2->Next() ){
+    ASSERT( iter2->Item()->getStatus() == READY);
+
+iter2->Item()->setWaitingTime(iter2->Item()->getWaitingTime()+TimerTicks);
+    if(iter2->Item()->getWaitingTime() >= 1500 
+    && iter2->Item()->getID() > 0 ){
+        oldPriority = iter2->Item()->getPriority();
+        newPriority = oldPriority + 10;
+        if (newPriority > 149){
+            newPriority = 149;
+        }
+        iter2->Item()->setPriority(newPriority);
+        L2ReadyList->Remove(iter2->Item());
+        ReadyToRun(iter2->Item());
+    }
+}
+// L3
+for( ; !iter3->IsDone(); iter3->Next() ){
+    ASSERT( iter3->Item()->getStatus() == READY);
+
+iter3->Item()->setWaitingTime(iter3->Item()->getWaitingTime()+TimerTicks);
+    if( iter3->Item()->getWaitingTime() >= 1500 
+    && iter3->Item()->getID() > 0 ){
+        oldPriority = iter3->Item()->getPriority();
+        newPriority = oldPriority + 10;
+        if (newPriority > 149){
+            newPriority = 149;
+        }
+        iter3->Item()->setPriority(newPriority);
+        L3ReadyList->Remove(iter3->Item());
+        ReadyToRun(iter3->Item());
+    }
+}
+}
+```
+
+修改排班演算法 (從L1 依序判斷到 L3來做新Thread的插入)
+* 可以注意的是，L1跟L2的Insert會順便呼叫之前寫的Compare函式來進行sorted insert
+```javascript=
+void
+Scheduler::ReadyToRun (Thread *thread)
+{    
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
+    
+    thread->setStatus(READY);
+    
+    if(thread->getPriority() >= 100 && thread->getPriority() <= 149)
+    {
+        if( !kernel->scheduler->L1ReadyList->IsInList(thread) ){
+            L1ReadyList->Insert(thread);
+        }
+    }
+    else if ( (thread->getPriority() >= 50 && thread->getPriority() <= 99) )
+    {
+        if( !L2ReadyList->IsInList(thread) ){
+            L2ReadyList->Insert(thread);
+        }
+    }
+    else if ( (thread->getPriority() >= 0 && thread->getPriority() <= 49) )
+    {
+        if( !L3ReadyList->IsInList(thread) ){
+            L3ReadyList->Append(thread);
+        }
+    }
+}
+```
+
+未來要從ready queue挑選下一個要執行的Thread時，只要依序從L1挑到L3就好了
+```javascript=
+Thread *
+Scheduler::FindNextToRun ()
+{
+    ASSERT(kernel->interrupt->getLevel() == IntOff);
+
+    if( !L1ReadyList->IsEmpty() ){  
+        return L1ReadyList->RemoveFront();
+    }
+    else if ( !L2ReadyList->IsEmpty() ){ 
+        return L2ReadyList->RemoveFront();
+    }
+    else if ( !L3ReadyList->IsEmpty() ){
+        return L3ReadyList->RemoveFront();
+    }
+    else {
+        return NULL;
+    }
+}
+```
+
+### thread.c
+* 這邊記得把ReadyToRun從迴圈裡面拉出來，放到FindNextToRun之前
+* 不然在某些情況下會發生Priority比較高的Process比Priority低的Process晚跑的情況
+```javascript=
+void
+Thread::Yield ()
+{
+    ...
+    kernel->scheduler->ReadyToRun(this); 
+    nextThread = kernel->scheduler->FindNextToRun();
+    ...
+}
+```
+
+### Alarm.c
+* 根據Hint: 
+    * The operations of preemption and priority updating can be delayed until the next timer alarm interval
+* 於是我們在每個Timer Interrupt之間進行
+    1. Aging判斷
+    2. execution time累計
+    3. L1或L3的preemptive判斷
+```javascript=
+void 
+Alarm::CallBack() 
+{
+    Interrupt *interrupt = kernel->interrupt;
+    MachineStatus status = interrupt->getStatus();
+    
+    kernel->scheduler->updatePriority();
+    
+    Thread *thread = kernel->currentThread;
+    thread->setExecutionTime(thread->getExecutionTime() + TimerTicks);
+    thread->setL3Time(thread->getL3Time() + TimerTicks);
+    
+    if ( kernel->currentThread->getID() > 0 
+        && status != IdleMode 
+        && kernel->currentThread->getPriority() >= 100 ) 
+    {
+        interrupt->YieldOnReturn();
+    }
+    
+    if ( status != IdleMode && kernel->currentThread->getPriority() < 50 ) {
+	    if ( kernel->currentThread->getL3Time() >= 99 ){
+              interrupt->YieldOnReturn();
+      }
+    }
+}
+```
+
+## 2-2 Add a command line argument "-ep"
+### kernel.h
+```c=
+Private:
+    Thread* t[51]; 
+    int threadPriority[51];
+    char*   execfile[51]; 
+```
+* 這邊我新增了 threadPriority 這個陣列，用來儲存Thread對應到的Priority
+* 為了防止遇到極大量Thread的測資，我把陣列大小擴增到 51 (多1個為了存main thread)
+
+### Kernel.c
+* 於Kernel的建構子新增一個 "-ep" 的指令來設定Thread初始Priority，很簡單不解釋
+```javascript=
+    else if (strcmp(argv[i], "-ep") == 0) {
+        ASSERT(i + 2 < argc);
+        execfile[++execfileNum]= argv[++i];
+        threadPriority[execfileNum] = atoi(argv[++i]);
+        if(threadPriority[execfileNum] > 149) {
+            threadPriority[execfileNum] = 149;
+        }
+        if(threadPriority[execfileNum] < 0){
+            threadPriority[execfileNum] = 0;
+        }
+        cout << execfile[execfileNum] << "\n";
+        cout << "Priority = " << threadPriority[execfileNum] << "\n";
+    } 
+```
+
+* 接著微調ExecAll函式，多接收一個threadPriority[i]參數
+```javascript=
+void Kernel::ExecAll()
+{
+    for (int i=1;i<=execfileNum;i++) {
+        int a = Exec(execfile[i], threadPriority[i]);
+    }
+    currentThread->Finish();
+}
+```
+
+* Exec這邊多接收一個priority參數，並做一些初始化設定 (懶人作法)
+    * 比較好的做法應該是修改thread的建構子，在裡面完成一切初始化，保持Exec這邊語法簡潔
+```javascript=
+int Kernel::Exec(char* name, int priority)
+{
+    t[threadNum] = new Thread(name, threadNum);
+    t[threadNum]->setBurstTime(0); 
+    t[threadNum]->setWaitingTime(0);
+    t[threadNum]->setExecutionTime(0);
+    t[threadNum]->setPriority(priority);
+    t[threadNum]->space = new AddrSpace();
+    t[threadNum]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[threadNum]);
+    threadNum++;
+    return threadNum-1;
+}
+```
+
+## 2-3 Add a debugging flag 'z'
+這邊不再貼程式碼上來，簡單敘述我在哪裡加上Debug訊息
+
+A. Scheduler::ReadyToRun
+
+B. Scheduler::FindNextToRun 以及 Aging的時候 (升級Ready Queue)
+
+C. Scheduler::updatePriority()，每一次Aging完之後
+
+D. Thread::Sleep，Status = BLOCKED之後
+
+E. Scheduler::Run裡面的SWITCH( )之前
+
+示意圖:
+
+![](https://i.imgur.com/rDE4P1k.jpg)
 
 ---
 
@@ -1534,3 +1848,4 @@ Machine::Run()就是在模擬MIPS架構CPU的每一條指令每一個Tick的執�
                             * **略... (到Run這邊之後已經非常複雜了，總之最後會透過SWITCH呼叫x86組語，然後跑到ForkExecute，再到Execute再到Machine::Run，然後就是經典的 for(;;){OneInstru, OneTick}迴圈了!!)**
                         * kernel->interrupt->SetLevel(oldLevel);
     * currentThread->Finish()
+
