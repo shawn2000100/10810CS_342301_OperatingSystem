@@ -1,0 +1,12 @@
+Building Instructions:
+ * got to the directory build.<host>, where <host> is your working OS
+ * do a "make depend" to build depenencies (DO IT!)
+ * do a "make" to build NachOS
+
+Usage:
+see "nachos -u" for all command line options
+
+Building and starting user-level programs in NachOS:
+ * use Mips cross-compiler to build and link coff-binaries
+ * use coff2noff to translate the binaries to the NachOS-format
+ * start binary with nachos -x <path_to_file/file>

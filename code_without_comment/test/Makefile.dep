@@ -1,0 +1,63 @@
+#############################################################################
+# Machine-specific definitions
+#
+# If you are not in the MFCF environment, you can either add a new
+# automatic test for your machine/OS type, or you should set the
+# necessary variables "manually" here
+#############################################################################
+
+# unfortunately, command line arguments to uname are not
+# very consistent across UNIX flavours.  However, the following
+# seem to work almost everywhere in MFCF land
+
+osname = $(shell uname -s)
+osrelease = $(shell uname -r)
+
+hosttype = unknown
+
+# Test for x86 Linux 
+# !!! COMMENT THE FOLLOWING LINES OUT IF BUILDING FOR SOLARIS HOST !!!
+# !!! ADD PATH TO CPP and CROSS COMPILER
+
+ifeq ($(osname),Linux)
+# full path name of your cpp program i.e.: 
+CPP = ../../usr/local/nachos/lib/gcc-lib/decstation-ultrix/2.95.2/cpp
+# directory in which your gcc cross-compiler lives i.e.: 
+GCCDIR = ../../usr/local/nachos/bin/decstation-ultrix-
+LDFLAGS = -T script -N
+ASFLAGS = -mips2
+CPPFLAGS = $(INCDIR)
+COFF2NOFF = ../../coff2noff/coff2noff.x86Linux
+hosttype = x86Linux
+endif
+
+ifeq ($(osname),Windows)
+CPP = /usr/local/nachosxdev/lib/gcc-lib/decstation-ultrix/2.95.3/cpp0
+# directory in which your gcc cross-compiler lives i.e.:
+GCCDIR = /usr/local/nachosxdev/bin/decstation-ultrix-
+LDFLAGS = -T script -N
+ASFLAGS = -mips2
+CPPFLAGS = $(INCDIR)
+COFF2NOFF = ../../coff2noff/coff2noff.Windows
+hosttype = Windows
+endif
+
+# Note:
+# If you are trying to build on MacOS X
+# try something like this, substituting whatever
+# uname -s returns on your machine for the XXX
+#
+#ifeq ($(osname),XXX)
+#CPP = full path name of your cpp program
+#GCCDIR = directory in which your gcc cross-compiler lives
+#LDFLAGS = -T script -N
+#ASFLAGS = -mips2
+#CPPFLAGS = $(INCDIR)
+#COFF2NOFF = full pathname of your coff2noff program
+# Note: it has been moved to part of the Nachos distribution
+# COFF2NOFF = ../../coff2noff.mipsUltrix
+#hosttype = MacOS
+#endif
+
+
+

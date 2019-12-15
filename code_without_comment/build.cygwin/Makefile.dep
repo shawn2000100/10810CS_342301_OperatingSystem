@@ -1,0 +1,544 @@
+##################################################################
+#  Machine Dependencies - this file is included automatically
+#     into the main Makefile
+#
+# This file contains definitions below for x86 running Linux
+# It has *not* been tested!
+##################################################################
+
+HOSTCFLAGS = -Dx86 -DLINUX -DCYGWIN
+
+#-----------------------------------------------------------------
+# Do not put anything below this point - it will be destroyed by
+# "make depend"
+#
+# DO NOT DELETE THIS LINE -- make depend uses it
+# DEPENDENCIES MUST END AT END OF FILE
+bitmap.o: ../lib/bitmap.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/bitmap.h
+debug.o: ../lib/debug.cc ../lib/copyright.h ../lib/utility.h \
+ ../lib/debug.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h
+hash.o: ../lib/hash.cc ../lib/copyright.h
+libtest.o: ../lib/libtest.cc ../lib/copyright.h ../lib/libtest.h \
+ ../lib/bitmap.h ../lib/utility.h ../lib/list.h ../lib/debug.h \
+ ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/list.cc ../lib/hash.h ../lib/hash.cc
+list.o: ../lib/list.cc ../lib/copyright.h
+sysdep.o: ../lib/sysdep.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h /usr/include/unistd.h /usr/include/sys/unistd.h \
+ /usr/include/getopt.h /usr/include/sys/time.h \
+ /usr/include/sys/select.h /usr/include/time.h \
+ /usr/include/machine/time.h /usr/include/sys/file.h \
+ /usr/include/fcntl.h /usr/include/sys/fcntl.h /usr/include/sys/stat.h \
+ /usr/include/cygwin/stat.h /usr/include/sys/socket.h \
+ /usr/include/features.h /usr/include/cygwin/socket.h \
+ /usr/include/asm/socket.h /usr/include/cygwin/if.h \
+ /usr/include/cygwin/sockios.h /usr/include/cygwin/uio.h \
+ /usr/include/sys/un.h /usr/include/signal.h /usr/include/sys/signal.h
+interrupt.o: ../machine/interrupt.cc ../lib/copyright.h \
+ ../machine/interrupt.h ../lib/list.h ../lib/debug.h ../lib/utility.h \
+ ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/list.cc ../machine/callback.h \
+ ../threads/main.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+stats.o: ../machine/stats.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/stats.h
+timer.o: ../machine/timer.cc ../lib/copyright.h ../machine/timer.h \
+ ../lib/utility.h ../machine/callback.h ../threads/main.h \
+ ../lib/debug.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/stats.h ../threads/alarm.h
+console.o: ../machine/console.cc ../lib/copyright.h \
+ ../machine/console.h ../lib/utility.h ../machine/callback.h \
+ ../threads/main.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+machine.o: ../machine/machine.cc ../lib/copyright.h \
+ ../machine/machine.h ../lib/utility.h ../machine/translate.h \
+ ../threads/main.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/scheduler.h ../lib/list.h ../lib/list.cc \
+ ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h
+mipssim.o: ../machine/mipssim.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/machine.h ../machine/translate.h \
+ ../machine/mipssim.h ../threads/main.h ../threads/kernel.h \
+ ../threads/thread.h ../userprog/addrspace.h ../filesys/filesys.h \
+ ../filesys/openfile.h ../threads/scheduler.h ../lib/list.h \
+ ../lib/list.cc ../machine/interrupt.h ../machine/callback.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+translate.o: ../machine/translate.cc ../lib/copyright.h \
+ ../threads/main.h ../lib/debug.h ../lib/utility.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/callback.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h
+network.o: ../machine/network.cc ../lib/copyright.h \
+ ../machine/network.h ../lib/utility.h ../machine/callback.h \
+ ../threads/main.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+disk.o: ../machine/disk.cc ../lib/copyright.h ../machine/disk.h \
+ ../lib/utility.h ../machine/callback.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/main.h ../threads/kernel.h \
+ ../threads/thread.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/scheduler.h ../lib/list.h ../lib/list.cc \
+ ../machine/interrupt.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h
+alarm.o: ../threads/alarm.cc ../lib/copyright.h ../threads/alarm.h \
+ ../lib/utility.h ../machine/callback.h ../machine/timer.h \
+ ../threads/main.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/stats.h
+kernel.o: ../threads/kernel.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/main.h ../threads/kernel.h \
+ ../threads/thread.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/scheduler.h ../lib/list.h ../lib/list.cc \
+ ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h ../threads/synch.h \
+ ../threads/synchlist.h ../threads/synchlist.cc ../lib/libtest.h \
+ ../userprog/synchconsole.h ../machine/console.h \
+ ../filesys/synchdisk.h ../machine/disk.h ../network/post.h \
+ ../machine/network.h
+main.o: ../threads/main.cc ../lib/copyright.h ../threads/main.h \
+ ../lib/debug.h ../lib/utility.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/callback.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h
+scheduler.o: ../threads/scheduler.cc ../lib/copyright.h ../lib/debug.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/scheduler.h ../lib/list.h \
+ ../lib/list.cc ../threads/thread.h ../machine/machine.h \
+ ../machine/translate.h ../userprog/addrspace.h ../filesys/filesys.h \
+ ../filesys/openfile.h ../threads/main.h ../threads/kernel.h \
+ ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h
+synch.o: ../threads/synch.cc ../lib/copyright.h ../threads/synch.h \
+ ../threads/thread.h ../lib/utility.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../lib/list.h ../lib/debug.h ../lib/list.cc ../threads/main.h \
+ ../threads/kernel.h ../threads/scheduler.h ../machine/interrupt.h \
+ ../machine/callback.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h
+synchlist.o: ../threads/synchlist.cc ../lib/copyright.h \
+ ../threads/synchlist.h ../lib/list.h ../lib/debug.h ../lib/utility.h \
+ ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/list.cc ../threads/synch.h \
+ ../threads/thread.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/main.h ../threads/kernel.h ../threads/scheduler.h \
+ ../machine/interrupt.h ../machine/callback.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h ../threads/synchlist.cc
+thread.o: ../threads/thread.cc ../lib/copyright.h ../threads/thread.h \
+ ../lib/utility.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/switch.h ../threads/synch.h ../lib/list.h ../lib/debug.h \
+ ../lib/list.cc ../threads/main.h ../threads/kernel.h \
+ ../threads/scheduler.h ../machine/interrupt.h ../machine/callback.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+addrspace.o: ../userprog/addrspace.cc ../lib/copyright.h \
+ ../threads/main.h ../lib/debug.h ../lib/utility.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/callback.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h ../userprog/noff.h
+exception.o: ../userprog/exception.cc ../lib/copyright.h \
+ ../threads/main.h ../lib/debug.h ../lib/utility.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../threads/kernel.h ../threads/thread.h \
+ ../machine/machine.h ../machine/translate.h ../userprog/addrspace.h \
+ ../filesys/filesys.h ../filesys/openfile.h ../threads/scheduler.h \
+ ../lib/list.h ../lib/list.cc ../machine/interrupt.h \
+ ../machine/callback.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h ../userprog/syscall.h ../userprog/errno.h \
+ ../userprog/ksyscall.h
+synchconsole.o: ../userprog/synchconsole.cc ../lib/copyright.h \
+ ../userprog/synchconsole.h ../lib/utility.h ../machine/callback.h \
+ ../machine/console.h ../threads/synch.h ../threads/thread.h \
+ ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../lib/list.h ../lib/debug.h ../lib/list.cc ../threads/main.h \
+ ../threads/kernel.h ../threads/scheduler.h ../machine/interrupt.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+directory.o: ../filesys/directory.cc ../lib/copyright.h \
+ ../lib/utility.h ../filesys/filehdr.h ../machine/disk.h \
+ ../machine/callback.h ../filesys/pbitmap.h ../lib/bitmap.h \
+ ../filesys/openfile.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../filesys/directory.h
+filehdr.o: ../filesys/filehdr.cc ../lib/copyright.h \
+ ../filesys/filehdr.h ../machine/disk.h ../lib/utility.h \
+ ../machine/callback.h ../filesys/pbitmap.h ../lib/bitmap.h \
+ ../filesys/openfile.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/debug.h ../filesys/synchdisk.h \
+ ../threads/synch.h ../threads/thread.h ../machine/machine.h \
+ ../machine/translate.h ../userprog/addrspace.h ../filesys/filesys.h \
+ ../lib/list.h ../lib/list.cc ../threads/main.h ../threads/kernel.h \
+ ../threads/scheduler.h ../machine/interrupt.h ../machine/stats.h \
+ ../threads/alarm.h ../machine/timer.h
+filesys.o: ../filesys/filesys.cc
+pbitmap.o: ../filesys/pbitmap.cc ../lib/copyright.h \
+ ../filesys/pbitmap.h ../lib/bitmap.h ../lib/utility.h \
+ ../filesys/openfile.h ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h
+openfile.o: ../filesys/openfile.cc
+synchdisk.o: ../filesys/synchdisk.cc ../lib/copyright.h \
+ ../filesys/synchdisk.h ../machine/disk.h ../lib/utility.h \
+ ../machine/callback.h ../threads/synch.h ../threads/thread.h \
+ ../lib/sysdep.h /usr/include/g++-3/iostream.h \
+ /usr/include/g++-3/streambuf.h /usr/include/g++-3/libio.h \
+ /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../lib/list.h ../lib/debug.h ../lib/list.cc ../threads/main.h \
+ ../threads/kernel.h ../threads/scheduler.h ../machine/interrupt.h \
+ ../machine/stats.h ../threads/alarm.h ../machine/timer.h
+post.o: ../network/post.cc ../lib/copyright.h ../network/post.h \
+ ../lib/utility.h ../machine/callback.h ../machine/network.h \
+ ../threads/synchlist.h ../lib/list.h ../lib/debug.h ../lib/sysdep.h \
+ /usr/include/g++-3/iostream.h /usr/include/g++-3/streambuf.h \
+ /usr/include/g++-3/libio.h /usr/include/_G_config.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/stdlib.h /usr/include/_ansi.h \
+ /usr/include/sys/config.h /usr/include/sys/reent.h \
+ /usr/include/sys/_types.h /usr/include/machine/stdlib.h \
+ /usr/include/alloca.h /usr/include/stdio.h \
+ /usr/lib/gcc-lib/i686-pc-cygwin/2.95.3-5/include/stdarg.h \
+ /usr/include/sys/types.h /usr/include/machine/types.h \
+ /usr/include/sys/features.h /usr/include/cygwin/types.h \
+ /usr/include/sys/sysmacros.h /usr/include/sys/stdio.h \
+ /usr/include/string.h ../lib/list.cc ../threads/synch.h \
+ ../threads/thread.h ../machine/machine.h ../machine/translate.h \
+ ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
+ ../threads/main.h ../threads/kernel.h ../threads/scheduler.h \
+ ../machine/interrupt.h ../machine/stats.h ../threads/alarm.h \
+ ../machine/timer.h ../threads/synchlist.cc
+# DEPENDENCIES MUST END AT END OF FILE
+# IF YOU PUT STUFF HERE IT WILL GO AWAY
+# see make depend above
