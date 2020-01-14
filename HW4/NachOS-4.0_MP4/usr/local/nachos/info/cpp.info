@@ -1,0 +1,80 @@
+This is Info file cpp.info, produced by Makeinfo version 1.68 from the
+input file ../../gcc-2.95.2/gcc/cpp.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* Cpp: (cpp).		       The GNU C preprocessor.
+END-INFO-DIR-ENTRY
+
+   This file documents the GNU C Preprocessor.
+
+   Copyright 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1997, 1998 Free
+Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the entire resulting derived work is distributed under the terms
+of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+
+Indirect:
+cpp.info-1: 947
+cpp.info-2: 50078
+cpp.info-3: 91263
+
+Tag Table:
+(Indirect)
+Node: Top947
+Node: Global Actions3856
+Node: Directives6376
+Node: Header Files8063
+Node: Header Uses8722
+Node: Include Syntax10214
+Node: Include Operation13356
+Node: Once-Only15218
+Node: Inheritance17643
+Node: Macros20176
+Node: Simple Macros21090
+Node: Argument Macros24078
+Node: Predefined29876
+Node: Standard Predefined30306
+Node: Nonstandard Predefined37964
+Node: Stringification41540
+Node: Concatenation44466
+Node: Undefining47739
+Node: Redefining48778
+Node: Macro Pitfalls50078
+Node: Misnesting51182
+Node: Macro Parentheses52196
+Node: Swallow Semicolon54064
+Node: Side Effects55962
+Node: Self-Reference57660
+Node: Argument Prescan59936
+Node: Cascaded Macros64938
+Node: Newlines in Args66083
+Node: Conditionals67428
+Node: Conditional Uses68780
+Node: Conditional Syntax70203
+Node: #if Directive70789
+Node: #else Directive73078
+Node: #elif Directive73745
+Node: Deleted Code75123
+Node: Conditionals-Macros76184
+Node: Assertions79869
+Node: #error Directive84104
+Node: Combining Sources85589
+Node: Other Directives88500
+Node: Output89954
+Node: Invocation91263
+Node: Concept Index106047
+Node: Index109059
+
+End Tag Table

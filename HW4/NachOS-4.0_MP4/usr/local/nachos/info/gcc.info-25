@@ -1,0 +1,980 @@
+This is Info file gcc.info, produced by Makeinfo version 1.68 from the
+input file ../../gcc-2.95.2/gcc/gcc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* gcc: (gcc).                  The GNU Compiler Collection.
+END-INFO-DIR-ENTRY
+   This file documents the use and the internals of the GNU compiler.
+
+   Published by the Free Software Foundation 59 Temple Place - Suite 330
+Boston, MA 02111-1307 USA
+
+   Copyright (C) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+1999 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the sections entitled "GNU General Public License" and "Funding
+for Free Software" are included exactly as in the original, and
+provided that the entire resulting derived work is distributed under
+the terms of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that the sections entitled "GNU General Public
+License" and "Funding for Free Software", and this permission notice,
+may be included in translations approved by the Free Software Foundation
+instead of in the original English.
+
+
+File: gcc.info,  Node: Trampolines,  Next: Library Calls,  Prev: Varargs,  Up: Target Macros
+
+Trampolines for Nested Functions
+================================
+
+   A "trampoline" is a small piece of code that is created at run time
+when the address of a nested function is taken.  It normally resides on
+the stack, in the stack frame of the containing function.  These macros
+tell GNU CC how to generate code to allocate and initialize a
+trampoline.
+
+   The instructions in the trampoline must do two things: load a
+constant address into the static chain register, and jump to the real
+address of the nested function.  On CISC machines such as the m68k,
+this requires two instructions, a move immediate and a jump.  Then the
+two addresses exist in the trampoline as word-long immediate operands.
+On RISC machines, it is often necessary to load each address into a
+register in two parts.  Then pieces of each address form separate
+immediate operands.
+
+   The code generated to initialize the trampoline must store the
+variable parts--the static chain value and the function address--into
+the immediate operands of the instructions.  On a CISC machine, this is
+simply a matter of copying each address to a memory reference at the
+proper offset from the start of the trampoline.  On a RISC machine, it
+may be necessary to take out pieces of the address and store them
+separately.
+
+`TRAMPOLINE_TEMPLATE (FILE)'
+     A C statement to output, on the stream FILE, assembler code for a
+     block of data that contains the constant parts of a trampoline.
+     This code should not include a label--the label is taken care of
+     automatically.
+
+     If you do not define this macro, it means no template is needed
+     for the target.  Do not define this macro on systems where the
+     block move code to copy the trampoline into place would be larger
+     than the code to generate it on the spot.
+
+`TRAMPOLINE_SECTION'
+     The name of a subroutine to switch to the section in which the
+     trampoline template is to be placed (*note Sections::.).  The
+     default is a value of `readonly_data_section', which places the
+     trampoline in the section containing read-only data.
+
+`TRAMPOLINE_SIZE'
+     A C expression for the size in bytes of the trampoline, as an
+     integer.
+
+`TRAMPOLINE_ALIGNMENT'
+     Alignment required for trampolines, in bits.
+
+     If you don't define this macro, the value of `BIGGEST_ALIGNMENT'
+     is used for aligning trampolines.
+
+`INITIALIZE_TRAMPOLINE (ADDR, FNADDR, STATIC_CHAIN)'
+     A C statement to initialize the variable parts of a trampoline.
+     ADDR is an RTX for the address of the trampoline; FNADDR is an RTX
+     for the address of the nested function; STATIC_CHAIN is an RTX for
+     the static chain value that should be passed to the function when
+     it is called.
+
+`ALLOCATE_TRAMPOLINE (FP)'
+     A C expression to allocate run-time space for a trampoline.  The
+     expression value should be an RTX representing a memory reference
+     to the space for the trampoline.
+
+     If this macro is not defined, by default the trampoline is
+     allocated as a stack slot.  This default is right for most
+     machines.  The exceptions are machines where it is impossible to
+     execute instructions in the stack area.  On such machines, you may
+     have to implement a separate stack, using this macro in
+     conjunction with `FUNCTION_PROLOGUE' and `FUNCTION_EPILOGUE'.
+
+     FP points to a data structure, a `struct function', which
+     describes the compilation status of the immediate containing
+     function of the function which the trampoline is for.  Normally
+     (when `ALLOCATE_TRAMPOLINE' is not defined), the stack slot for the
+     trampoline is in the stack frame of this containing function.
+     Other allocation strategies probably must do something analogous
+     with this information.
+
+   Implementing trampolines is difficult on many machines because they
+have separate instruction and data caches.  Writing into a stack
+location fails to clear the memory in the instruction cache, so when
+the program jumps to that location, it executes the old contents.
+
+   Here are two possible solutions.  One is to clear the relevant parts
+of the instruction cache whenever a trampoline is set up.  The other is
+to make all trampolines identical, by having them jump to a standard
+subroutine.  The former technique makes trampoline execution faster; the
+latter makes initialization faster.
+
+   To clear the instruction cache when a trampoline is initialized,
+define the following macros which describe the shape of the cache.
+
+`INSN_CACHE_SIZE'
+     The total size in bytes of the cache.
+
+`INSN_CACHE_LINE_WIDTH'
+     The length in bytes of each cache line.  The cache is divided into
+     cache lines which are disjoint slots, each holding a contiguous
+     chunk of data fetched from memory.  Each time data is brought into
+     the cache, an entire line is read at once.  The data loaded into a
+     cache line is always aligned on a boundary equal to the line size.
+
+`INSN_CACHE_DEPTH'
+     The number of alternative cache lines that can hold any particular
+     memory location.
+
+   Alternatively, if the machine has system calls or instructions to
+clear the instruction cache directly, you can define the following
+macro.
+
+`CLEAR_INSN_CACHE (BEG, END)'
+     If defined, expands to a C expression clearing the *instruction
+     cache* in the specified interval.  If it is not defined, and the
+     macro INSN_CACHE_SIZE is defined, some generic code is generated
+     to clear the cache.  The definition of this macro would typically
+     be a series of `asm' statements.  Both BEG and END are both pointer
+     expressions.
+
+   To use a standard subroutine, define the following macro.  In
+addition, you must make sure that the instructions in a trampoline fill
+an entire cache line with identical instructions, or else ensure that
+the beginning of the trampoline code is always aligned at the same
+point in its cache line.  Look in `m68k.h' as a guide.
+
+`TRANSFER_FROM_TRAMPOLINE'
+     Define this macro if trampolines need a special subroutine to do
+     their work.  The macro should expand to a series of `asm'
+     statements which will be compiled with GNU CC.  They go in a
+     library function named `__transfer_from_trampoline'.
+
+     If you need to avoid executing the ordinary prologue code of a
+     compiled C function when you jump to the subroutine, you can do so
+     by placing a special label of your own in the assembler code.  Use
+     one `asm' statement to generate an assembler label, and another to
+     make the label global.  Then trampolines can use that label to
+     jump directly to your special assembler code.
+
+
+File: gcc.info,  Node: Library Calls,  Next: Addressing Modes,  Prev: Trampolines,  Up: Target Macros
+
+Implicit Calls to Library Routines
+==================================
+
+   Here is an explanation of implicit calls to library routines.
+
+`MULSI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     multiplication of one signed full-word by another.  If you do not
+     define this macro, the default name is used, which is `__mulsi3',
+     a function defined in `libgcc.a'.
+
+`DIVSI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     division of one signed full-word by another.  If you do not define
+     this macro, the default name is used, which is `__divsi3', a
+     function defined in `libgcc.a'.
+
+`UDIVSI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     division of one unsigned full-word by another.  If you do not
+     define this macro, the default name is used, which is `__udivsi3',
+     a function defined in `libgcc.a'.
+
+`MODSI3_LIBCALL'
+     A C string constant giving the name of the function to call for the
+     remainder in division of one signed full-word by another.  If you
+     do not define this macro, the default name is used, which is
+     `__modsi3', a function defined in `libgcc.a'.
+
+`UMODSI3_LIBCALL'
+     A C string constant giving the name of the function to call for the
+     remainder in division of one unsigned full-word by another.  If
+     you do not define this macro, the default name is used, which is
+     `__umodsi3', a function defined in `libgcc.a'.
+
+`MULDI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     multiplication of one signed double-word by another.  If you do not
+     define this macro, the default name is used, which is `__muldi3',
+     a function defined in `libgcc.a'.
+
+`DIVDI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     division of one signed double-word by another.  If you do not
+     define this macro, the default name is used, which is `__divdi3', a
+     function defined in `libgcc.a'.
+
+`UDIVDI3_LIBCALL'
+     A C string constant giving the name of the function to call for
+     division of one unsigned full-word by another.  If you do not
+     define this macro, the default name is used, which is `__udivdi3',
+     a function defined in `libgcc.a'.
+
+`MODDI3_LIBCALL'
+     A C string constant giving the name of the function to call for the
+     remainder in division of one signed double-word by another.  If
+     you do not define this macro, the default name is used, which is
+     `__moddi3', a function defined in `libgcc.a'.
+
+`UMODDI3_LIBCALL'
+     A C string constant giving the name of the function to call for the
+     remainder in division of one unsigned full-word by another.  If
+     you do not define this macro, the default name is used, which is
+     `__umoddi3', a function defined in `libgcc.a'.
+
+`INIT_TARGET_OPTABS'
+     Define this macro as a C statement that declares additional library
+     routines renames existing ones. `init_optabs' calls this macro
+     after initializing all the normal library routines.
+
+`TARGET_EDOM'
+     The value of `EDOM' on the target machine, as a C integer constant
+     expression.  If you don't define this macro, GNU CC does not
+     attempt to deposit the value of `EDOM' into `errno' directly.
+     Look in `/usr/include/errno.h' to find the value of `EDOM' on your
+     system.
+
+     If you do not define `TARGET_EDOM', then compiled code reports
+     domain errors by calling the library function and letting it
+     report the error.  If mathematical functions on your system use
+     `matherr' when there is an error, then you should leave
+     `TARGET_EDOM' undefined so that `matherr' is used normally.
+
+`GEN_ERRNO_RTX'
+     Define this macro as a C expression to create an rtl expression
+     that refers to the global "variable" `errno'.  (On certain systems,
+     `errno' may not actually be a variable.)  If you don't define this
+     macro, a reasonable default is used.
+
+`TARGET_MEM_FUNCTIONS'
+     Define this macro if GNU CC should generate calls to the System V
+     (and ANSI C) library functions `memcpy' and `memset' rather than
+     the BSD functions `bcopy' and `bzero'.
+
+`LIBGCC_NEEDS_DOUBLE'
+     Define this macro if only `float' arguments cannot be passed to
+     library routines (so they must be converted to `double').  This
+     macro affects both how library calls are generated and how the
+     library routines in `libgcc1.c' accept their arguments.  It is
+     useful on machines where floating and fixed point arguments are
+     passed differently, such as the i860.
+
+`FLOAT_ARG_TYPE'
+     Define this macro to override the type used by the library
+     routines to pick up arguments of type `float'.  (By default, they
+     use a union of `float' and `int'.)
+
+     The obvious choice would be `float'--but that won't work with
+     traditional C compilers that expect all arguments declared as
+     `float' to arrive as `double'.  To avoid this conversion, the
+     library routines ask for the value as some other type and then
+     treat it as a `float'.
+
+     On some systems, no other type will work for this.  For these
+     systems, you must use `LIBGCC_NEEDS_DOUBLE' instead, to force
+     conversion of the values `double' before they are passed.
+
+`FLOATIFY (PASSED-VALUE)'
+     Define this macro to override the way library routines redesignate
+     a `float' argument as a `float' instead of the type it was passed
+     as.  The default is an expression which takes the `float' field of
+     the union.
+
+`FLOAT_VALUE_TYPE'
+     Define this macro to override the type used by the library
+     routines to return values that ought to have type `float'.  (By
+     default, they use `int'.)
+
+     The obvious choice would be `float'--but that won't work with
+     traditional C compilers gratuitously convert values declared as
+     `float' into `double'.
+
+`INTIFY (FLOAT-VALUE)'
+     Define this macro to override the way the value of a
+     `float'-returning library routine should be packaged in order to
+     return it.  These functions are actually declared to return type
+     `FLOAT_VALUE_TYPE' (normally `int').
+
+     These values can't be returned as type `float' because traditional
+     C compilers would gratuitously convert the value to a `double'.
+
+     A local variable named `intify' is always available when the macro
+     `INTIFY' is used.  It is a union of a `float' field named `f' and
+     a field named `i' whose type is `FLOAT_VALUE_TYPE' or `int'.
+
+     If you don't define this macro, the default definition works by
+     copying the value through that union.
+
+`nongcc_SI_type'
+     Define this macro as the name of the data type corresponding to
+     `SImode' in the system's own C compiler.
+
+     You need not define this macro if that type is `long int', as it
+     usually is.
+
+`nongcc_word_type'
+     Define this macro as the name of the data type corresponding to the
+     word_mode in the system's own C compiler.
+
+     You need not define this macro if that type is `long int', as it
+     usually is.
+
+`perform_...'
+     Define these macros to supply explicit C statements to carry out
+     various arithmetic operations on types `float' and `double' in the
+     library routines in `libgcc1.c'.  See that file for a full list of
+     these macros and their arguments.
+
+     On most machines, you don't need to define any of these macros,
+     because the C compiler that comes with the system takes care of
+     doing them.
+
+`NEXT_OBJC_RUNTIME'
+     Define this macro to generate code for Objective C message sending
+     using the calling convention of the NeXT system.  This calling
+     convention involves passing the object, the selector and the
+     method arguments all at once to the method-lookup library function.
+
+     The default calling convention passes just the object and the
+     selector to the lookup function, which returns a pointer to the
+     method.
+
+
+File: gcc.info,  Node: Addressing Modes,  Next: Condition Code,  Prev: Library Calls,  Up: Target Macros
+
+Addressing Modes
+================
+
+   This is about addressing modes.
+
+`HAVE_POST_INCREMENT'
+     A C expression that is nonzero the machine supports post-increment
+     addressing.
+
+`HAVE_PRE_INCREMENT'
+`HAVE_POST_DECREMENT'
+`HAVE_PRE_DECREMENT'
+     Similar for other kinds of addressing.
+
+`CONSTANT_ADDRESS_P (X)'
+     A C expression that is 1 if the RTX X is a constant which is a
+     valid address.  On most machines, this can be defined as
+     `CONSTANT_P (X)', but a few machines are more restrictive in which
+     constant addresses are supported.
+
+     `CONSTANT_P' accepts integer-values expressions whose values are
+     not explicitly known, such as `symbol_ref', `label_ref', and
+     `high' expressions and `const' arithmetic expressions, in addition
+     to `const_int' and `const_double' expressions.
+
+`MAX_REGS_PER_ADDRESS'
+     A number, the maximum number of registers that can appear in a
+     valid memory address.  Note that it is up to you to specify a
+     value equal to the maximum number that `GO_IF_LEGITIMATE_ADDRESS'
+     would ever accept.
+
+`GO_IF_LEGITIMATE_ADDRESS (MODE, X, LABEL)'
+     A C compound statement with a conditional `goto LABEL;' executed
+     if X (an RTX) is a legitimate memory address on the target machine
+     for a memory operand of mode MODE.
+
+     It usually pays to define several simpler macros to serve as
+     subroutines for this one.  Otherwise it may be too complicated to
+     understand.
+
+     This macro must exist in two variants: a strict variant and a
+     non-strict one.  The strict variant is used in the reload pass.  It
+     must be defined so that any pseudo-register that has not been
+     allocated a hard register is considered a memory reference.  In
+     contexts where some kind of register is required, a pseudo-register
+     with no hard register must be rejected.
+
+     The non-strict variant is used in other passes.  It must be
+     defined to accept all pseudo-registers in every context where some
+     kind of register is required.
+
+     Compiler source files that want to use the strict variant of this
+     macro define the macro `REG_OK_STRICT'.  You should use an `#ifdef
+     REG_OK_STRICT' conditional to define the strict variant in that
+     case and the non-strict variant otherwise.
+
+     Subroutines to check for acceptable registers for various purposes
+     (one for base registers, one for index registers, and so on) are
+     typically among the subroutines used to define
+     `GO_IF_LEGITIMATE_ADDRESS'.  Then only these subroutine macros
+     need have two variants; the higher levels of macros may be the
+     same whether strict or not.
+
+     Normally, constant addresses which are the sum of a `symbol_ref'
+     and an integer are stored inside a `const' RTX to mark them as
+     constant.  Therefore, there is no need to recognize such sums
+     specifically as legitimate addresses.  Normally you would simply
+     recognize any `const' as legitimate.
+
+     Usually `PRINT_OPERAND_ADDRESS' is not prepared to handle constant
+     sums that are not marked with  `const'.  It assumes that a naked
+     `plus' indicates indexing.  If so, then you *must* reject such
+     naked constant sums as illegitimate addresses, so that none of
+     them will be given to `PRINT_OPERAND_ADDRESS'.
+
+     On some machines, whether a symbolic address is legitimate depends
+     on the section that the address refers to.  On these machines,
+     define the macro `ENCODE_SECTION_INFO' to store the information
+     into the `symbol_ref', and then check for it here.  When you see a
+     `const', you will have to look inside it to find the `symbol_ref'
+     in order to determine the section.  *Note Assembler Format::.
+
+     The best way to modify the name string is by adding text to the
+     beginning, with suitable punctuation to prevent any ambiguity.
+     Allocate the new name in `saveable_obstack'.  You will have to
+     modify `ASM_OUTPUT_LABELREF' to remove and decode the added text
+     and output the name accordingly, and define `STRIP_NAME_ENCODING'
+     to access the original name string.
+
+     You can check the information stored here into the `symbol_ref' in
+     the definitions of the macros `GO_IF_LEGITIMATE_ADDRESS' and
+     `PRINT_OPERAND_ADDRESS'.
+
+`REG_OK_FOR_BASE_P (X)'
+     A C expression that is nonzero if X (assumed to be a `reg' RTX) is
+     valid for use as a base register.  For hard registers, it should
+     always accept those which the hardware permits and reject the
+     others.  Whether the macro accepts or rejects pseudo registers
+     must be controlled by `REG_OK_STRICT' as described above.  This
+     usually requires two variant definitions, of which `REG_OK_STRICT'
+     controls the one actually used.
+
+`REG_MODE_OK_FOR_BASE_P (X, MODE)'
+     A C expression that is just like `REG_OK_FOR_BASE_P', except that
+     that expression may examine the mode of the memory reference in
+     MODE.  You should define this macro if the mode of the memory
+     reference affects whether a register may be used as a base
+     register.  If you define this macro, the compiler will use it
+     instead of `REG_OK_FOR_BASE_P'.
+
+`REG_OK_FOR_INDEX_P (X)'
+     A C expression that is nonzero if X (assumed to be a `reg' RTX) is
+     valid for use as an index register.
+
+     The difference between an index register and a base register is
+     that the index register may be scaled.  If an address involves the
+     sum of two registers, neither one of them scaled, then either one
+     may be labeled the "base" and the other the "index"; but whichever
+     labeling is used must fit the machine's constraints of which
+     registers may serve in each capacity.  The compiler will try both
+     labelings, looking for one that is valid, and will reload one or
+     both registers only if neither labeling works.
+
+`LEGITIMIZE_ADDRESS (X, OLDX, MODE, WIN)'
+     A C compound statement that attempts to replace X with a valid
+     memory address for an operand of mode MODE.  WIN will be a C
+     statement label elsewhere in the code; the macro definition may use
+
+          GO_IF_LEGITIMATE_ADDRESS (MODE, X, WIN);
+
+     to avoid further processing if the address has become legitimate.
+
+     X will always be the result of a call to `break_out_memory_refs',
+     and OLDX will be the operand that was given to that function to
+     produce X.
+
+     The code generated by this macro should not alter the substructure
+     of X.  If it transforms X into a more legitimate form, it should
+     assign X (which will always be a C variable) a new value.
+
+     It is not necessary for this macro to come up with a legitimate
+     address.  The compiler has standard ways of doing so in all cases.
+     In fact, it is safe for this macro to do nothing.  But often a
+     machine-dependent strategy can generate better code.
+
+`LEGITIMIZE_RELOAD_ADDRESS (X, MODE, OPNUM, TYPE, IND_LEVELS, WIN)'
+     A C compound statement that attempts to replace X, which is an
+     address that needs reloading, with a valid memory address for an
+     operand of mode MODE.  WIN will be a C statement label elsewhere
+     in the code.  It is not necessary to define this macro, but it
+     might be useful for performance reasons.
+
+     For example, on the i386, it is sometimes possible to use a single
+     reload register instead of two by reloading a sum of two pseudo
+     registers into a register.  On the other hand, for number of RISC
+     processors offsets are limited so that often an intermediate
+     address needs to be generated in order to address a stack slot.
+     By defining LEGITIMIZE_RELOAD_ADDRESS appropriately, the
+     intermediate addresses generated for adjacent some stack slots can
+     be made identical, and thus be shared.
+
+     *Note*: This macro should be used with caution.  It is necessary
+     to know something of how reload works in order to effectively use
+     this, and it is quite easy to produce macros that build in too
+     much knowledge of reload internals.
+
+     *Note*: This macro must be able to reload an address created by a
+     previous invocation of this macro.  If it fails to handle such
+     addresses then the compiler may generate incorrect code or abort.
+
+     The macro definition should use `push_reload' to indicate parts
+     that need reloading; OPNUM, TYPE and IND_LEVELS are usually
+     suitable to be passed unaltered to `push_reload'.
+
+     The code generated by this macro must not alter the substructure of
+     X.  If it transforms X into a more legitimate form, it should
+     assign X (which will always be a C variable) a new value.  This
+     also applies to parts that you change indirectly by calling
+     `push_reload'.
+
+     The macro definition may use `strict_memory_address_p' to test if
+     the address has become legitimate.
+
+     If you want to change only a part of X, one standard way of doing
+     this is to use `copy_rtx'.  Note, however, that is unshares only a
+     single level of rtl.  Thus, if the part to be changed is not at the
+     top level, you'll need to replace first the top leve It is not
+     necessary for this macro to come up with a legitimate address;
+     but often a machine-dependent strategy can generate better code.
+
+`GO_IF_MODE_DEPENDENT_ADDRESS (ADDR, LABEL)'
+     A C statement or compound statement with a conditional `goto
+     LABEL;' executed if memory address X (an RTX) can have different
+     meanings depending on the machine mode of the memory reference it
+     is used for or if the address is valid for some modes but not
+     others.
+
+     Autoincrement and autodecrement addresses typically have
+     mode-dependent effects because the amount of the increment or
+     decrement is the size of the operand being addressed.  Some
+     machines have other mode-dependent addresses.  Many RISC machines
+     have no mode-dependent addresses.
+
+     You may assume that ADDR is a valid address for the machine.
+
+`LEGITIMATE_CONSTANT_P (X)'
+     A C expression that is nonzero if X is a legitimate constant for
+     an immediate operand on the target machine.  You can assume that X
+     satisfies `CONSTANT_P', so you need not check this.  In fact, `1'
+     is a suitable definition for this macro on machines where anything
+     `CONSTANT_P' is valid.
+
+
+File: gcc.info,  Node: Condition Code,  Next: Costs,  Prev: Addressing Modes,  Up: Target Macros
+
+Condition Code Status
+=====================
+
+   This describes the condition code status.
+
+   The file `conditions.h' defines a variable `cc_status' to describe
+how the condition code was computed (in case the interpretation of the
+condition code depends on the instruction that it was set by).  This
+variable contains the RTL expressions on which the condition code is
+currently based, and several standard flags.
+
+   Sometimes additional machine-specific flags must be defined in the
+machine description header file.  It can also add additional
+machine-specific information by defining `CC_STATUS_MDEP'.
+
+`CC_STATUS_MDEP'
+     C code for a data type which is used for declaring the `mdep'
+     component of `cc_status'.  It defaults to `int'.
+
+     This macro is not used on machines that do not use `cc0'.
+
+`CC_STATUS_MDEP_INIT'
+     A C expression to initialize the `mdep' field to "empty".  The
+     default definition does nothing, since most machines don't use the
+     field anyway.  If you want to use the field, you should probably
+     define this macro to initialize it.
+
+     This macro is not used on machines that do not use `cc0'.
+
+`NOTICE_UPDATE_CC (EXP, INSN)'
+     A C compound statement to set the components of `cc_status'
+     appropriately for an insn INSN whose body is EXP.  It is this
+     macro's responsibility to recognize insns that set the condition
+     code as a byproduct of other activity as well as those that
+     explicitly set `(cc0)'.
+
+     This macro is not used on machines that do not use `cc0'.
+
+     If there are insns that do not set the condition code but do alter
+     other machine registers, this macro must check to see whether they
+     invalidate the expressions that the condition code is recorded as
+     reflecting.  For example, on the 68000, insns that store in address
+     registers do not set the condition code, which means that usually
+     `NOTICE_UPDATE_CC' can leave `cc_status' unaltered for such insns.
+     But suppose that the previous insn set the condition code based
+     on location `a4@(102)' and the current insn stores a new value in
+     `a4'.  Although the condition code is not changed by this, it will
+     no longer be true that it reflects the contents of `a4@(102)'.
+     Therefore, `NOTICE_UPDATE_CC' must alter `cc_status' in this case
+     to say that nothing is known about the condition code value.
+
+     The definition of `NOTICE_UPDATE_CC' must be prepared to deal with
+     the results of peephole optimization: insns whose patterns are
+     `parallel' RTXs containing various `reg', `mem' or constants which
+     are just the operands.  The RTL structure of these insns is not
+     sufficient to indicate what the insns actually do.  What
+     `NOTICE_UPDATE_CC' should do when it sees one is just to run
+     `CC_STATUS_INIT'.
+
+     A possible definition of `NOTICE_UPDATE_CC' is to call a function
+     that looks at an attribute (*note Insn Attributes::.) named, for
+     example, `cc'.  This avoids having detailed information about
+     patterns in two places, the `md' file and in `NOTICE_UPDATE_CC'.
+
+`EXTRA_CC_MODES'
+     A list of names to be used for additional modes for condition code
+     values in registers (*note Jump Patterns::.).  These names are
+     added to `enum machine_mode' and all have class `MODE_CC'.  By
+     convention, they should start with `CC' and end with `mode'.
+
+     You should only define this macro if your machine does not use
+     `cc0' and only if additional modes are required.
+
+`EXTRA_CC_NAMES'
+     A list of C strings giving the names for the modes listed in
+     `EXTRA_CC_MODES'.  For example, the Sparc defines this macro and
+     `EXTRA_CC_MODES' as
+
+          #define EXTRA_CC_MODES CC_NOOVmode, CCFPmode, CCFPEmode
+          #define EXTRA_CC_NAMES "CC_NOOV", "CCFP", "CCFPE"
+
+     This macro is not required if `EXTRA_CC_MODES' is not defined.
+
+`SELECT_CC_MODE (OP, X, Y)'
+     Returns a mode from class `MODE_CC' to be used when comparison
+     operation code OP is applied to rtx X and Y.  For example, on the
+     Sparc, `SELECT_CC_MODE' is defined as (see *note Jump Patterns::.
+     for a description of the reason for this definition)
+
+          #define SELECT_CC_MODE(OP,X,Y) \
+            (GET_MODE_CLASS (GET_MODE (X)) == MODE_FLOAT          \
+             ? ((OP == EQ || OP == NE) ? CCFPmode : CCFPEmode)    \
+             : ((GET_CODE (X) == PLUS || GET_CODE (X) == MINUS    \
+                 || GET_CODE (X) == NEG) \
+                ? CC_NOOVmode : CCmode))
+
+     You need not define this macro if `EXTRA_CC_MODES' is not defined.
+
+`CANONICALIZE_COMPARISON (CODE, OP0, OP1)'
+     One some machines not all possible comparisons are defined, but
+     you can convert an invalid comparison into a valid one.  For
+     example, the Alpha does not have a `GT' comparison, but you can
+     use an `LT' comparison instead and swap the order of the operands.
+
+     On such machines, define this macro to be a C statement to do any
+     required conversions.  CODE is the initial comparison code and OP0
+     and OP1 are the left and right operands of the comparison,
+     respectively.  You should modify CODE, OP0, and OP1 as required.
+
+     GNU CC will not assume that the comparison resulting from this
+     macro is valid but will see if the resulting insn matches a
+     pattern in the `md' file.
+
+     You need not define this macro if it would never change the
+     comparison code or operands.
+
+`REVERSIBLE_CC_MODE (MODE)'
+     A C expression whose value is one if it is always safe to reverse a
+     comparison whose mode is MODE.  If `SELECT_CC_MODE' can ever
+     return MODE for a floating-point inequality comparison, then
+     `REVERSIBLE_CC_MODE (MODE)' must be zero.
+
+     You need not define this macro if it would always returns zero or
+     if the floating-point format is anything other than
+     `IEEE_FLOAT_FORMAT'.  For example, here is the definition used on
+     the Sparc, where floating-point inequality comparisons are always
+     given `CCFPEmode':
+
+          #define REVERSIBLE_CC_MODE(MODE)  ((MODE) != CCFPEmode)
+
+
+File: gcc.info,  Node: Costs,  Next: Sections,  Prev: Condition Code,  Up: Target Macros
+
+Describing Relative Costs of Operations
+=======================================
+
+   These macros let you describe the relative speed of various
+operations on the target machine.
+
+`CONST_COSTS (X, CODE, OUTER_CODE)'
+     A part of a C `switch' statement that describes the relative costs
+     of constant RTL expressions.  It must contain `case' labels for
+     expression codes `const_int', `const', `symbol_ref', `label_ref'
+     and `const_double'.  Each case must ultimately reach a `return'
+     statement to return the relative cost of the use of that kind of
+     constant value in an expression.  The cost may depend on the
+     precise value of the constant, which is available for examination
+     in X, and the rtx code of the expression in which it is contained,
+     found in OUTER_CODE.
+
+     CODE is the expression code--redundant, since it can be obtained
+     with `GET_CODE (X)'.
+
+`RTX_COSTS (X, CODE, OUTER_CODE)'
+     Like `CONST_COSTS' but applies to nonconstant RTL expressions.
+     This can be used, for example, to indicate how costly a multiply
+     instruction is.  In writing this macro, you can use the construct
+     `COSTS_N_INSNS (N)' to specify a cost equal to N fast
+     instructions.  OUTER_CODE is the code of the expression in which X
+     is contained.
+
+     This macro is optional; do not define it if the default cost
+     assumptions are adequate for the target machine.
+
+`DEFAULT_RTX_COSTS (X, CODE, OUTER_CODE)'
+     This macro, if defined, is called for any case not handled by the
+     `RTX_COSTS' or `CONST_COSTS' macros.  This eliminates the need to
+     put case labels into the macro, but the code, or any functions it
+     calls, must assume that the RTL in X could be of any type that has
+     not already been handled.  The arguments are the same as for
+     `RTX_COSTS', and the macro should execute a return statement giving
+     the cost of any RTL expressions that it can handle.  The default
+     cost calculation is used for any RTL for which this macro does not
+     return a value.
+
+     This macro is optional; do not define it if the default cost
+     assumptions are adequate for the target machine.
+
+`ADDRESS_COST (ADDRESS)'
+     An expression giving the cost of an addressing mode that contains
+     ADDRESS.  If not defined, the cost is computed from the ADDRESS
+     expression and the `CONST_COSTS' values.
+
+     For most CISC machines, the default cost is a good approximation
+     of the true cost of the addressing mode.  However, on RISC
+     machines, all instructions normally have the same length and
+     execution time.  Hence all addresses will have equal costs.
+
+     In cases where more than one form of an address is known, the form
+     with the lowest cost will be used.  If multiple forms have the
+     same, lowest, cost, the one that is the most complex will be used.
+
+     For example, suppose an address that is equal to the sum of a
+     register and a constant is used twice in the same basic block.
+     When this macro is not defined, the address will be computed in a
+     register and memory references will be indirect through that
+     register.  On machines where the cost of the addressing mode
+     containing the sum is no higher than that of a simple indirect
+     reference, this will produce an additional instruction and
+     possibly require an additional register.  Proper specification of
+     this macro eliminates this overhead for such machines.
+
+     Similar use of this macro is made in strength reduction of loops.
+
+     ADDRESS need not be valid as an address.  In such a case, the cost
+     is not relevant and can be any value; invalid addresses need not be
+     assigned a different cost.
+
+     On machines where an address involving more than one register is as
+     cheap as an address computation involving only one register,
+     defining `ADDRESS_COST' to reflect this can cause two registers to
+     be live over a region of code where only one would have been if
+     `ADDRESS_COST' were not defined in that manner.  This effect should
+     be considered in the definition of this macro.  Equivalent costs
+     should probably only be given to addresses with different numbers
+     of registers on machines with lots of registers.
+
+     This macro will normally either not be defined or be defined as a
+     constant.
+
+`REGISTER_MOVE_COST (FROM, TO)'
+     A C expression for the cost of moving data from a register in class
+     FROM to one in class TO.  The classes are expressed using the
+     enumeration values such as `GENERAL_REGS'.  A value of 2 is the
+     default; other values are interpreted relative to that.
+
+     It is not required that the cost always equal 2 when FROM is the
+     same as TO; on some machines it is expensive to move between
+     registers if they are not general registers.
+
+     If reload sees an insn consisting of a single `set' between two
+     hard registers, and if `REGISTER_MOVE_COST' applied to their
+     classes returns a value of 2, reload does not check to ensure that
+     the constraints of the insn are met.  Setting a cost of other than
+     2 will allow reload to verify that the constraints are met.  You
+     should do this if the `movM' pattern's constraints do not allow
+     such copying.
+
+`MEMORY_MOVE_COST (MODE, CLASS, IN)'
+     A C expression for the cost of moving data of mode MODE between a
+     register of class CLASS and memory; IN is zero if the value is to
+     be written to memory, non-zero if it is to be read in.  This cost
+     is relative to those in `REGISTER_MOVE_COST'.  If moving between
+     registers and memory is more expensive than between two registers,
+     you should define this macro to express the relative cost.
+
+     If you do not define this macro, GNU CC uses a default cost of 4
+     plus the cost of copying via a secondary reload register, if one is
+     needed.  If your machine requires a secondary reload register to
+     copy between memory and a register of CLASS but the reload
+     mechanism is more complex than copying via an intermediate, define
+     this macro to reflect the actual cost of the move.
+
+     GNU CC defines the function `memory_move_secondary_cost' if
+     secondary reloads are needed.  It computes the costs due to
+     copying via a secondary register.  If your machine copies from
+     memory using a secondary register in the conventional way but the
+     default base value of 4 is not correct for your machine, define
+     this macro to add some other value to the result of that function.
+     The arguments to that function are the same as to this macro.
+
+`BRANCH_COST'
+     A C expression for the cost of a branch instruction.  A value of 1
+     is the default; other values are interpreted relative to that.
+
+   Here are additional macros which do not specify precise relative
+costs, but only that certain actions are more expensive than GNU CC
+would ordinarily expect.
+
+`SLOW_BYTE_ACCESS'
+     Define this macro as a C expression which is nonzero if accessing
+     less than a word of memory (i.e. a `char' or a `short') is no
+     faster than accessing a word of memory, i.e., if such access
+     require more than one instruction or if there is no difference in
+     cost between byte and (aligned) word loads.
+
+     When this macro is not defined, the compiler will access a field by
+     finding the smallest containing object; when it is defined, a
+     fullword load will be used if alignment permits.  Unless bytes
+     accesses are faster than word accesses, using word accesses is
+     preferable since it may eliminate subsequent memory access if
+     subsequent accesses occur to other fields in the same word of the
+     structure, but to different bytes.
+
+`SLOW_ZERO_EXTEND'
+     Define this macro if zero-extension (of a `char' or `short' to an
+     `int') can be done faster if the destination is a register that is
+     known to be zero.
+
+     If you define this macro, you must have instruction patterns that
+     recognize RTL structures like this:
+
+          (set (strict_low_part (subreg:QI (reg:SI ...) 0)) ...)
+
+     and likewise for `HImode'.
+
+`SLOW_UNALIGNED_ACCESS'
+     Define this macro to be the value 1 if unaligned accesses have a
+     cost many times greater than aligned accesses, for example if they
+     are emulated in a trap handler.
+
+     When this macro is non-zero, the compiler will act as if
+     `STRICT_ALIGNMENT' were non-zero when generating code for block
+     moves.  This can cause significantly more instructions to be
+     produced.  Therefore, do not set this macro non-zero if unaligned
+     accesses only add a cycle or two to the time for a memory access.
+
+     If the value of this macro is always zero, it need not be defined.
+
+`DONT_REDUCE_ADDR'
+     Define this macro to inhibit strength reduction of memory
+     addresses.  (On some machines, such strength reduction seems to do
+     harm rather than good.)
+
+`MOVE_RATIO'
+     The threshold of number of scalar memory-to-memory move insns,
+     *below* which a sequence of insns  should be generated instead of a
+     string move insn or a library call.  Increasing the value will
+     always make code faster, but eventually incurs high cost in
+     increased code size.
+
+     Note that on machines with no memory-to-memory move insns, this
+     macro denotes the corresponding number of memory-to-memory
+     *sequences*.
+
+     If you don't define this, a reasonable default is used.
+
+`MOVE_BY_PIECES_P (SIZE, ALIGNMENT)'
+     A C expression used to determine whether `move_by_pieces' will be
+     used to copy a chunk of memory, or whether some other block move
+     mechanism will be used.  Defaults to 1 if `move_by_pieces_ninsns'
+     returns less than `MOVE_RATIO'.
+
+`MOVE_MAX_PIECES'
+     A C expression used by `move_by_pieces' to determine the largest
+     unit a load or store used to copy memory is.  Defaults to
+     `MOVE_MAX'.
+
+`USE_LOAD_POST_INCREMENT (MODE)'
+     A C expression used to determine whether a load postincrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_POST_INCREMENT'.
+
+`USE_LOAD_POST_DECREMENT (MODE)'
+     A C expression used to determine whether a load postdecrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_POST_DECREMENT'.
+
+`USE_LOAD_PRE_INCREMENT (MODE)'
+     A C expression used to determine whether a load preincrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_PRE_INCREMENT'.
+
+`USE_LOAD_PRE_DECREMENT (MODE)'
+     A C expression used to determine whether a load predecrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_PRE_DECREMENT'.
+
+`USE_STORE_POST_INCREMENT (MODE)'
+     A C expression used to determine whether a store postincrement is
+     a good thing to use for a given mode.  Defaults to the value of
+     `HAVE_POST_INCREMENT'.
+
+`USE_STORE_POST_DECREMENT (MODE)'
+     A C expression used to determine whether a store postdeccrement is
+     a good thing to use for a given mode.  Defaults to the value of
+     `HAVE_POST_DECREMENT'.
+
+`USE_STORE_PRE_INCREMENT (MODE)'
+     This macro is used to determine whether a store preincrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_PRE_INCREMENT'.
+
+`USE_STORE_PRE_DECREMENT (MODE)'
+     This macro is used to determine whether a store predecrement is a
+     good thing to use for a given mode.  Defaults to the value of
+     `HAVE_PRE_DECREMENT'.
+
+`NO_FUNCTION_CSE'
+     Define this macro if it is as good or better to call a constant
+     function address than to call an address kept in a register.
+
+`NO_RECURSIVE_FUNCTION_CSE'
+     Define this macro if it is as good or better for a function to call
+     itself with an explicit address than to call an address kept in a
+     register.
+
+`ADJUST_COST (INSN, LINK, DEP_INSN, COST)'
+     A C statement (sans semicolon) to update the integer variable COST
+     based on the relationship between INSN that is dependent on
+     DEP_INSN through the dependence LINK.  The default is to make no
+     adjustment to COST.  This can be used for example to specify to
+     the scheduler that an output- or anti-dependence does not incur
+     the same cost as a data-dependence.
+
+`ADJUST_PRIORITY (INSN)'
+     A C statement (sans semicolon) to update the integer scheduling
+     priority `INSN_PRIORITY(INSN)'.  Reduce the priority to execute
+     the INSN earlier, increase the priority to execute INSN later.
+     Do not define this macro if you do not need to adjust the
+     scheduling priorities of insns.
+

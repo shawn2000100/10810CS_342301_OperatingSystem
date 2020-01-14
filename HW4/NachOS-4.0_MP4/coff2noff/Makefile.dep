@@ -1,0 +1,91 @@
+#############################################################################
+# Machine-specific definitions
+#
+# In the MFCF environment, this attempts to determine automatically
+#  the machine type and OS type.  If it cannot, it gives up and
+#  prints a message.
+#
+# If you are not in the MFCF environment, you can either add a new
+# automatic test for your machine/OS type, or you can set the
+# necessary variables "manually" here
+#############################################################################
+
+# unfortunately, command line arguments to uname are not
+# very consistent across UNIX flavours.  However, the following
+# seem to work almost everywhere in MFCF land
+
+osname = $(shell uname -s)
+osrelease = $(shell uname -r)
+
+hosttype = unknown
+
+# Test for Solaris (5.6)
+# At Waterloo: agnesi,bacon,fenchel,fitch,lassar,magnus,merrill
+# If Solaris, we assume we are on a SPARC, which is not necessarily
+#  a good assumption outside of MFCF
+ifeq ($(osname),SunOS)
+ifeq ($(osrelease),5.6)
+HOSTCFLAGS = -DHOST_IS_BIG_ENDIAN
+hosttype = sparcSolaris
+endif
+endif
+
+# Test for Solaris (5.5)
+# At Waterloo: hermite.math,markov.math,picard.math,wronski.math,...
+# If Solaris, we assume we are on a SPARC, which is not necessarily
+#  a good assumption outside of MFCF
+ifeq ($(osname),SunOS)
+ifeq ($(osrelease),5.5)
+HOSTCFLAGS = -DHOST_IS_BIG_ENDIAN
+hosttype = sparcSolaris
+endif
+endif
+
+# Test for Solaris (5.4)
+# At Waterloo: hume.math, hypatia.math,...
+# This is the same setup as Solaris 5.5
+# If Solaris, we assume we are on a SPARC, which is not necessarily
+#  a good assumption outside of MFCF
+ifeq ($(osname),SunOS)
+ifeq ($(osrelease),5.4)
+HOSTCFLAGS = -DHOST_IS_BIG_ENDIAN
+hosttype = sparcSolaris
+endif
+endif
+
+# Test for SunOS 4.xx
+# At Waterloo:  descartes,cayley,napier,....
+# If SunOS, we assume we are on a SPARC, which is not necessarily
+#  a good assumption outside of MFCF
+ifeq ($(osname),SunOS)
+ifeq ($(osrelease),4.1.3_U1)
+HOSTCFLAGS = -DHOST_IS_BIG_ENDIAN
+hosttype = sparcSunOS
+endif
+endif
+
+# Test for ULTRIX
+# At Waterloo: cantor.math,noether.math
+# Assume ULTRIX on a MIPS architecture
+ifeq ($(osname),ULTRIX)
+HOSTCFLAGS = 
+hosttype = mipsUltrix
+endif
+
+# Note:
+# If you are trying to build on Linux on an x86
+# try something like this, substituting whatever
+# uname -s returns on your machine for the XXX
+#
+ifeq ($(osname),Linux)
+HOSTCFLAGS =
+hosttype = x86Linux
+endif
+
+ifeq ($(osname),CYGWIN_NT-5.1)
+HOSTCFLAGS =
+hosttype = x86Linux
+endif
+
+
+
